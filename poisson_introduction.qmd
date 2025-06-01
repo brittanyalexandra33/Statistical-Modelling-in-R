@@ -17,7 +17,7 @@ editor_options:
     wrap: 72
 ---
 
-test test
+# Modelling processes that evolve randomly over time
 
 ```{r}
 # Load required libraries
