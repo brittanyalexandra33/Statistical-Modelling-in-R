@@ -34,7 +34,8 @@ Poisson process counts the number of events occurring in a fixed time or
 space, when events occur independently and at a constant average rate,
 where the formula for our statistical model is as follows:
 
-$Y_i \sim \text{Poisson}(\mu_i),$ where $\mu_i = \beta_0 + \beta_1 x_i\quad$
+$Y_i \sim \text{Poisson}(\mu_i),$ where
+$\mu_i = \beta_0 + \beta_1 x_i\quad$
 
 Diving a bit into understanding the foundations of how we will use this
 statistical model in R... It is worth noting that we need to use a link
@@ -45,7 +46,6 @@ In other words, the expected value of our response variable, $\mu_i$,
 must be non negative $(\mu_i\ ≥ 0)$. However, because we are using a
 log-link function, the model actually estimates $\log(\mu_i)$ which can
 take on any real number, that is $- \infty < \log(\mu_i) < +\infty$
-
 
 Today, we will look at how to use the poisson distribution to model the
 occurrence of volcanic events per year in Country A. This country is
