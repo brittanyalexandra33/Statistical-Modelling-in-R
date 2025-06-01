@@ -1,5 +1,5 @@
 ---
-title: "binomial_introduction"
+title: "Introduction to Binomial Modelling"
 author: "Brittany Alexandra"
 date: "`r Sys.Date()`"
 

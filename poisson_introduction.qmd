@@ -1,5 +1,5 @@
 ---
-title: "poisson_introduction"
+title: "Introduction to Poisson Modelling"
 author: "Brittany Alexandra"
 date: "`r Sys.Date()`"
 
@@ -24,35 +24,75 @@ Welcome to the soft introduction into Poisson modelling in R!
 Many things in life can be modelled with the poisson process as it quite
 literally models the long-term average rate of which random events occur
 indepdently. Its subjectively the most widely used model of a point
-process in time, and is suitable for
+process in time, and is suitable for modelling *frequencies* and
+probabilities*,* for example:
 
--   Inbound calls to a call center
+-   The frequency of goals scored by a team in a soccer match
 
--   Unique visitors to a website
+-   The probability two teams will score no goals in a soccer match
 
--   Walk-in arrivals to a physical location (customers or patients)
+-   The freqeuncy inbound calls to a call center
+
+-   The probability you receive 10 calls in one hour to a call center
+
+-   The frequency of unique visitors to a website
+
+-   The probability you receive 5 unique visitors to a website in 30
+    minutes
+
+-   The frequency walk-in arrivals to a physical location (customers or
+    patients)
+
+-   The probability you receive 30 walk-in arrivals to a physical
+    location in 2 hours.
 
 -   The frequency of volcanic eruptions
 
-When we first learn about Poisson models, it's tempting to think the
-response mean is modeled directly as $\mu_i = \beta_0 + \beta_1 x_i$,
-but this isn\'t actually valid. The mean must be non-negative, yet the
-linear predictor $\beta_0 + \beta_1 x_i$ can be any real number,
-including negative values. Therefore, modelling $\mu_i$ this way risks
-predicting impossible values (e.g. negative) values. To ensure
-$\mu_i > 0$, R (and the underlying GLM framework) uses a **log link**
-$\log(mu_i) = \beta_0 + \beta_1 x_i ⇒ \mu_i =exp(beta_0 + \beta_1 x_i)$
-This transformation guarantees that \$\\mu_i\$ is always positive, even
-if the linear predictor is negative. You can think of the model as being
+-   The probability there will be 2 volcanic eruptions in the next 10
+    years.
+
+All of these scenarios have the following in common which allow us to
+describe the response:
+
+-   The expected value is discrete
+
+-   The expected value is right skewed
+
+-   The expected value is bounded, where our values can only be ≥ 0
+
+-   The variance is non-constant, and increases equivalent to our
+    expected value
+
+So now that we have an understanding of what types of scenarios follow a
+poisson distribution, what do we do with this information? Well...
+
+In linear regression, our expected value is a linear combination of our
+explanatory variables such as $\mu_i = \beta_0 + \beta_1 x_i$, but when
+modelling with a poisson distribution, we must tweak this in R to ensure
+our expected value, $\mu_i$ can never be negative. After all, we
+couldn't have a negative number for any of the previous examples
+listed... Imagine having a negative number of unique visitors to a
+website! That would upset your boss lol.
+
+To accommodate this, we use a link function to map our parameter of
+interest, $\mu_i$ to the real number line. We do this, so that no matter
+how negative the linear predictor is $(\beta_0 $ or $\beta_1$), our
+expected value $(\mu_i)$ will always be positive.
+
+To ensure $\mu_i > 0$, R (and the underlying GLM framework) uses a **log
+link**
+$\log(mu_i) = \beta_0 + \beta_1 x_i ⇒ \mu_i =exp(beta_0 + \beta_1 x_i)$.
+This transformation guarantees that $\mu_i$ is always positive, even if
+the linear predictor is negative. You can think of the model as being
 linear **on the log scale**. Further, due to the logarithmic
 transformation, we must interpret coefficients multiplicatively: a
 one-unit increase in $x$ is associated with a **multiplicative** change
 in $\mu_i$.
 
-These two plots help visualize how the Poisson model transforms values
-using a **log link**. The log ensures the model stays linear on the log
-scale, while the exponential ensures predictions for the mean response,
-μ, are always positive.
+The two plots below help visualize how the Poisson model transforms
+values using a **log link**. The log ensures the model stays linear on
+the log scale, while the exponential ensures predictions for the mean
+response, μ, are always positive.
 
 -   The log link function transforms the expected value of our response
     variable, $\mu$ (which must be ≥ 0) into a value on the real number

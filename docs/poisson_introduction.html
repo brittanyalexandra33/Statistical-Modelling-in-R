@@ -9,7 +9,7 @@
 <meta name="author" content="Brittany Alexandra">
 <meta name="dcterms.date" content="2025-06-01">
 
-<title>Statistical Modelling in R - poisson_introduction</title>
+<title>Statistical Modelling in R - Introduction to Poisson Modelling</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -195,7 +195,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">poisson_introduction</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<div class="quarto-title-block"><div><h1 class="title">Introduction to Poisson Modelling</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
 </div>
 
 
@@ -225,15 +225,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="modelling-processes-that-evolve-randomly-over-time" class="level1">
 <h1>Modelling processes that evolve randomly over time</h1>
 <p>Welcome to the soft introduction into Poisson modelling in R!</p>
-<p>Many things in life can be modelled with the poisson process as it quite literally models the long-term average rate of which random events occur indepdently. Its subjectively the most widely used model of a point process in time, and is suitable for</p>
+<p>Many things in life can be modelled with the poisson process as it quite literally models the long-term average rate of which random events occur indepdently. Its subjectively the most widely used model of a point process in time, and is suitable for modelling <em>frequencies</em> and probabilities<em>,</em> for example:</p>
 <ul>
-<li><p>Inbound calls to a call center</p></li>
-<li><p>Unique visitors to a website</p></li>
-<li><p>Walk-in arrivals to a physical location (customers or patients)</p></li>
+<li><p>The frequency of goals scored by a team in a soccer match</p></li>
+<li><p>The probability two teams will score no goals in a soccer match</p></li>
+<li><p>The freqeuncy inbound calls to a call center</p></li>
+<li><p>The probability you receive 10 calls in one hour to a call center</p></li>
+<li><p>The frequency of unique visitors to a website</p></li>
+<li><p>The probability you receive 5 unique visitors to a website in 30 minutes</p></li>
+<li><p>The frequency walk-in arrivals to a physical location (customers or patients)</p></li>
+<li><p>The probability you receive 30 walk-in arrivals to a physical location in 2 hours.</p></li>
 <li><p>The frequency of volcanic eruptions</p></li>
+<li><p>The probability there will be 2 volcanic eruptions in the next 10 years.</p></li>
 </ul>
-<p>When we first learn about Poisson models, it’s tempting to think the response mean is modeled directly as <span class="math inline">\(\mu_i = \beta_0 + \beta_1 x_i\)</span>, but this isn't actually valid. The mean must be non-negative, yet the linear predictor <span class="math inline">\(\beta_0 + \beta_1 x_i\)</span> can be any real number, including negative values. Therefore, modelling <span class="math inline">\(\mu_i\)</span> this way risks predicting impossible values (e.g.&nbsp;negative) values. To ensure <span class="math inline">\(\mu_i &gt; 0\)</span>, R (and the underlying GLM framework) uses a <strong>log link</strong> <span class="math inline">\(\log(mu_i) = \beta_0 + \beta_1 x_i ⇒ \mu_i =exp(beta_0 + \beta_1 x_i)\)</span> This transformation guarantees that $\mu_i$ is always positive, even if the linear predictor is negative. You can think of the model as being linear <strong>on the log scale</strong>. Further, due to the logarithmic transformation, we must interpret coefficients multiplicatively: a one-unit increase in <span class="math inline">\(x\)</span> is associated with a <strong>multiplicative</strong> change in <span class="math inline">\(\mu_i\)</span>.</p>
-<p>These two plots help visualize how the Poisson model transforms values using a <strong>log link</strong>. The log ensures the model stays linear on the log scale, while the exponential ensures predictions for the mean response, μ, are always positive.</p>
+<p>All of these scenarios have the following in common which allow us to describe the response:</p>
+<ul>
+<li><p>The expected value is discrete</p></li>
+<li><p>The expected value is right skewed</p></li>
+<li><p>The expected value is bounded, where our values can only be ≥ 0</p></li>
+<li><p>The variance is non-constant, and increases equivalent to our expected value</p></li>
+</ul>
+<p>So now that we have an understanding of what types of scenarios follow a poisson distribution, what do we do with this information? Well…</p>
+<p>In linear regression, our expected value is a linear combination of our explanatory variables such as <span class="math inline">\(\mu_i = \beta_0 + \beta_1 x_i\)</span>, but when modelling with a poisson distribution, we must tweak this in R to ensure our expected value, <span class="math inline">\(\mu_i\)</span> can never be negative. After all, we couldn’t have a negative number for any of the previous examples listed… Imagine having a negative number of unique visitors to a website! That would upset your boss lol.</p>
+<p>To accommodate this, we use a link function to map our parameter of interest, <span class="math inline">\(\mu_i\)</span> to the real number line. We do this, so that no matter how negative the linear predictor is $(_0 $ or <span class="math inline">\(\beta_1\)</span>), our expected value <span class="math inline">\((\mu_i)\)</span> will always be positive.</p>
+<p>To ensure <span class="math inline">\(\mu_i &gt; 0\)</span>, R (and the underlying GLM framework) uses a <strong>log link</strong> <span class="math inline">\(\log(mu_i) = \beta_0 + \beta_1 x_i ⇒ \mu_i =exp(beta_0 + \beta_1 x_i)\)</span>. This transformation guarantees that <span class="math inline">\(\mu_i\)</span> is always positive, even if the linear predictor is negative. You can think of the model as being linear <strong>on the log scale</strong>. Further, due to the logarithmic transformation, we must interpret coefficients multiplicatively: a one-unit increase in <span class="math inline">\(x\)</span> is associated with a <strong>multiplicative</strong> change in <span class="math inline">\(\mu_i\)</span>.</p>
+<p>The two plots below help visualize how the Poisson model transforms values using a <strong>log link</strong>. The log ensures the model stays linear on the log scale, while the exponential ensures predictions for the mean response, μ, are always positive.</p>
 <ul>
 <li><p>The log link function transforms the expected value of our response variable, <span class="math inline">\(\mu\)</span> (which must be ≥ 0) into a value on the real number line. This is shown in the left plot: as <span class="math inline">\(\mu\)</span>increases, η=log⁡(μ) grows slowly but without bounds.</p></li>
 <li><p>Conversely, the inverse link function (right plot) transforms any real-valued model prediction, n, back to a valid expected count μ=exp⁡(η), which is always positive. This ensures our Poisson model makes realistic predictions for count data.</p></li>
@@ -576,7 +592,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="sourceCode" id="cb3" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "poisson_introduction"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Introduction to Poisson Modelling"</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Brittany Alexandra"</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "`r Sys.Date()`"</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
@@ -601,81 +617,121 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>Many things in life can be modelled with the poisson process as it quite</span>
 <span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>literally models the long-term average rate of which random events occur</span>
 <span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>indepdently. Its subjectively the most widely used model of a point</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>process in time, and is suitable for</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Inbound calls to a call center</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Unique visitors to a website</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Walk-in arrivals to a physical location (customers or patients)</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The frequency of volcanic eruptions</span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>When we first learn about Poisson models, it's tempting to think the</span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>response mean is modeled directly as $\mu_i = \beta_0 + \beta_1 x_i$,</span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>but this isn\'t actually valid. The mean must be non-negative, yet the</span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>linear predictor $\beta_0 + \beta_1 x_i$ can be any real number,</span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>including negative values. Therefore, modelling $\mu_i$ this way risks</span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>predicting impossible values (e.g. negative) values. To ensure</span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>$\mu_i &gt; 0$, R (and the underlying GLM framework) uses a **log link**</span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>$\log(mu_i) = \beta_0 + \beta_1 x_i ⇒ \mu_i =exp(beta_0 + \beta_1 x_i)$</span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>This transformation guarantees that \$<span class="sc">\\</span>mu_i\$ is always positive, even</span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>if the linear predictor is negative. You can think of the model as being</span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>linear **on the log scale**. Further, due to the logarithmic</span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>transformation, we must interpret coefficients multiplicatively: a</span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>one-unit increase in $x$ is associated with a **multiplicative** change</span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>in $\mu_i$.</span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>These two plots help visualize how the Poisson model transforms values</span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>using a **log link**. The log ensures the model stays linear on the log</span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>scale, while the exponential ensures predictions for the mean response,</span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>μ, are always positive.</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>process in time, and is suitable for modelling *frequencies* and</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>probabilities*,* for example:</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The frequency of goals scored by a team in a soccer match</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The probability two teams will score no goals in a soccer match</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The freqeuncy inbound calls to a call center</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The probability you receive 10 calls in one hour to a call center</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The frequency of unique visitors to a website</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The probability you receive 5 unique visitors to a website in 30</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    minutes</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The frequency walk-in arrivals to a physical location (customers or</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>    patients)</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The probability you receive 30 walk-in arrivals to a physical</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    location in 2 hours.</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The frequency of volcanic eruptions</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The probability there will be 2 volcanic eruptions in the next 10</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    years.</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>All of these scenarios have the following in common which allow us to</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>describe the response:</span>
 <span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The log link function transforms the expected value of our response</span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>    variable, $\mu$ (which must be ≥ 0) into a value on the real number</span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>    line. This is shown in the left plot: as $\mu$increases, η=log⁡(μ)</span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>    grows slowly but without bounds.</span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Conversely, the inverse link function (right plot) transforms any</span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>    real-valued model prediction, n, back to a valid expected count</span>
-<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>    μ=exp⁡(η), which is always positive. This ensures our Poisson model</span>
-<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>    makes realistic predictions for count data.</span>
-<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a><span class="co"># Load required libraries</span></span>
-<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a><span class="co"># Create data for mu (positive values only)</span></span>
-<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">0.01</span>, <span class="dv">10</span>, <span class="at">length.out =</span> <span class="dv">500</span>)</span>
-<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>eta_from_mu <span class="ot">&lt;-</span> <span class="fu">log</span>(mu)</span>
-<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">mu =</span> mu, <span class="at">eta =</span> eta_from_mu)</span>
-<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a><span class="co"># Create data for eta (real number line)</span></span>
-<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>eta <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>, <span class="at">length.out =</span> <span class="dv">500</span>)</span>
-<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>mu_from_eta <span class="ot">&lt;-</span> <span class="fu">exp</span>(eta)</span>
-<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">eta =</span> eta, <span class="at">mu =</span> mu_from_eta)</span>
-<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot 1: Link function (log)</span></span>
-<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a> <span class="fu">ggplot</span>(df1, <span class="fu">aes</span>(<span class="at">x =</span> mu, <span class="at">y =</span> eta)) <span class="sc">+</span></span>
-<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"blue"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Log Link Function: η = log(μ)"</span>,</span>
-<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">expression</span>(mu <span class="sc">~</span> <span class="st">"(mean of response)"</span>),</span>
-<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">expression</span>(eta <span class="sc">~</span> <span class="st">"(linear predictor)"</span>)</span>
-<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span>
-<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot 2: Inverse link function (exp)</span></span>
-<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df2, <span class="fu">aes</span>(<span class="at">x =</span> eta, <span class="at">y =</span> mu)) <span class="sc">+</span></span>
-<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"forestgreen"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Inverse Link Function: μ = exp(η)"</span>,</span>
-<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">expression</span>(eta <span class="sc">~</span> <span class="st">"(linear predictor)"</span>),</span>
-<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">expression</span>(mu <span class="sc">~</span> <span class="st">"(mean of response)"</span>)</span>
-<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span>
-<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The expected value is discrete</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The expected value is right skewed</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The expected value is bounded, where our values can only be ≥ 0</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The variance is non-constant, and increases equivalent to our</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>    expected value</span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>So now that we have an understanding of what types of scenarios follow a</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>poisson distribution, what do we do with this information? Well...</span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>In linear regression, our expected value is a linear combination of our</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>explanatory variables such as $\mu_i = \beta_0 + \beta_1 x_i$, but when</span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>modelling with a poisson distribution, we must tweak this in R to ensure</span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>our expected value, $\mu_i$ can never be negative. After all, we</span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>couldn't have a negative number for any of the previous examples</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>listed... Imagine having a negative number of unique visitors to a</span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>website! That would upset your boss lol.</span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>To accommodate this, we use a link function to map our parameter of</span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>interest, $\mu_i$ to the real number line. We do this, so that no matter</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>how negative the linear predictor is $(\beta_0 $ or $\beta_1$), our</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>expected value $(\mu_i)$ will always be positive.</span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>To ensure $\mu_i &gt; 0$, R (and the underlying GLM framework) uses a **log</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>link**</span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>$\log(mu_i) = \beta_0 + \beta_1 x_i ⇒ \mu_i =exp(beta_0 + \beta_1 x_i)$.</span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>This transformation guarantees that $\mu_i$ is always positive, even if</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>the linear predictor is negative. You can think of the model as being</span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>linear **on the log scale**. Further, due to the logarithmic</span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>transformation, we must interpret coefficients multiplicatively: a</span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>one-unit increase in $x$ is associated with a **multiplicative** change</span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>in $\mu_i$.</span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>The two plots below help visualize how the Poisson model transforms</span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>values using a **log link**. The log ensures the model stays linear on</span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>the log scale, while the exponential ensures predictions for the mean</span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>response, μ, are always positive.</span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The log link function transforms the expected value of our response</span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>    variable, $\mu$ (which must be ≥ 0) into a value on the real number</span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>    line. This is shown in the left plot: as $\mu$increases, η=log⁡(μ)</span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>    grows slowly but without bounds.</span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Conversely, the inverse link function (right plot) transforms any</span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>    real-valued model prediction, n, back to a valid expected count</span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>    μ=exp⁡(η), which is always positive. This ensures our Poisson model</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>    makes realistic predictions for count data.</span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a><span class="co"># Load required libraries</span></span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a><span class="co"># Create data for mu (positive values only)</span></span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">0.01</span>, <span class="dv">10</span>, <span class="at">length.out =</span> <span class="dv">500</span>)</span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>eta_from_mu <span class="ot">&lt;-</span> <span class="fu">log</span>(mu)</span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>df1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">mu =</span> mu, <span class="at">eta =</span> eta_from_mu)</span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a><span class="co"># Create data for eta (real number line)</span></span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a>eta <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>, <span class="at">length.out =</span> <span class="dv">500</span>)</span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a>mu_from_eta <span class="ot">&lt;-</span> <span class="fu">exp</span>(eta)</span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">eta =</span> eta, <span class="at">mu =</span> mu_from_eta)</span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot 1: Link function (log)</span></span>
+<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a> <span class="fu">ggplot</span>(df1, <span class="fu">aes</span>(<span class="at">x =</span> mu, <span class="at">y =</span> eta)) <span class="sc">+</span></span>
+<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"blue"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Log Link Function: η = log(μ)"</span>,</span>
+<span id="cb3-129"><a href="#cb3-129" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">expression</span>(mu <span class="sc">~</span> <span class="st">"(mean of response)"</span>),</span>
+<span id="cb3-130"><a href="#cb3-130" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">expression</span>(eta <span class="sc">~</span> <span class="st">"(linear predictor)"</span>)</span>
+<span id="cb3-131"><a href="#cb3-131" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-132"><a href="#cb3-132" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span>
+<span id="cb3-133"><a href="#cb3-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot 2: Inverse link function (exp)</span></span>
+<span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df2, <span class="fu">aes</span>(<span class="at">x =</span> eta, <span class="at">y =</span> mu)) <span class="sc">+</span></span>
+<span id="cb3-136"><a href="#cb3-136" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"forestgreen"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb3-137"><a href="#cb3-137" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb3-138"><a href="#cb3-138" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Inverse Link Function: μ = exp(η)"</span>,</span>
+<span id="cb3-139"><a href="#cb3-139" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">expression</span>(eta <span class="sc">~</span> <span class="st">"(linear predictor)"</span>),</span>
+<span id="cb3-140"><a href="#cb3-140" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">expression</span>(mu <span class="sc">~</span> <span class="st">"(mean of response)"</span>)</span>
+<span id="cb3-141"><a href="#cb3-141" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-142"><a href="#cb3-142" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span>
+<span id="cb3-143"><a href="#cb3-143" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

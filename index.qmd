@@ -17,9 +17,21 @@ editor_options:
     wrap: 72
 ---
 
-# **I appreciate you dropping by**😀
+# **I appreciate you dropping by** 😀
 
 My name's Bri. I enjoy statistical modelling and making predictions.
+
+I graduated with a degree in Statistics from the University of Auckland,
+have experienced work as a Data Scientist at New Zealands fastest
+growing start-up, as a Research Analyst at one of Vault's top 50
+consulting firms, and a Data Analyst at one of top 100 global
+universities. All in all, I'm grateful to have such a diverse experience
+that shapes my knowledge now. I love learning, and I love sharing, so I
+hope you enjoy the content on this website!
+
+This website contains short information bits on statistical modelling
+distributions, and examples on how to use them. I hope you find them
+useful, and if nothing else- interesting! I sure did.
 
 ```{r setup, include = FALSE, warning = FALSE, echo = FALSE}
 library(tidyverse)
