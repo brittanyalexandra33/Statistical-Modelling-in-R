@@ -1,0 +1,57 @@
+project:
+  type: website
+
+website:
+  title: "Statistical Modelling in R"
+  navbar:
+    left:
+      - text: "About"
+        menu:
+          - text: "About"
+          - href: index.qmd
+      - text: "Poisson Modelling"
+        menu:
+          - text: "Foundations in Poisson Modelling"
+            href: poisson_introduction.qmd
+          - text: "Poisson Modelling"
+            href: poisson_earthquakes.qmd
+      - text: "Binomial Modelling"
+        menu:
+          - text: "Foundations in Binomial Modelling"
+            href: binomial_introduction.qmd
+          - text: "Binomial Image Recognition"
+            href: binomial_image.qmd
+    right:
+      - icon: github
+        href: https://github.com/brittanyalexandra33
+        aria-label: GitHub
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+
+# project:
+#   type: website
+# 
+# website:
+#   title: "Statistics In R"
+#   navbar:
+#     left:
+#       - href: index.qmd
+#         text: Home
+#       - poisson_earthquakes.qmd
+#       - binomial_image.qmd
+#     tools: 
+#       - icon: github
+#       - href: https://github.com/brittanyalexandra33
+# 
+# format:
+#   html:
+#     theme: cosmo
+#     css: styles.css
+#     toc: true
+# 
+# editor: visual
+

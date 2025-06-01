@@ -1,0 +1,16 @@
+{
+  "hash": "febf89fbb96e5231f4135bc8cfac71dd",
+  "result": {
+    "markdown": "---\ntitle: \"About\"\nauthor: \"Brittany Alexandra\"\ndate: \"2025-06-01\"\n\nformat:\n  html:\n    theme: cerulean\n    toc: true\n    toc-depth: 2          \n    toc-location: left    \n    code-fold: true\n    code-tools: true\n\neditor_options: \n  markdown: \n    wrap: 72\n---\n\n\n# **I appreciate you dropping by**😀\n\nMy name\\'s Bri. I enjoy statistical modelling and making predictions.\n\n\n::: {.cell}\n::: {.cell-output .cell-output-stderr}\n```\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.1.1     ✔ readr     2.1.4\n✔ forcats   1.0.0     ✔ stringr   1.5.0\n✔ ggplot2   3.5.2     ✔ tibble    3.2.1\n✔ lubridate 1.9.4     ✔ tidyr     1.3.0\n✔ purrr     1.0.1     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors\n```\n:::\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

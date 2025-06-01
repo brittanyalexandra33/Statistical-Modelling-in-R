@@ -1,0 +1,20 @@
+---
+title: "binomial_introduction"
+author: "Brittany Alexandra"
+date: "`r Sys.Date()`"
+
+format:
+  html:
+    theme: cerulean
+    toc: true
+    toc-depth: 2          
+    toc-location: left    
+    code-fold: true
+    code-tools: true
+
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+test

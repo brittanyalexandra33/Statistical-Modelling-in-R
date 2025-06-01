@@ -1,0 +1,62 @@
+---
+title: "About"
+author: "Brittany Alexandra"
+date: "`r Sys.Date()`"
+
+format:
+  html:
+    theme: cerulean
+    toc: true
+    toc-depth: 2          
+    toc-location: left    
+    code-fold: true
+    code-tools: true
+
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# **I appreciate you dropping by**😀
+
+My name's Bri. I enjoy statistical modelling and making predictions.
+
+```{r, warning = FALSE, echo = FALSE}
+library(tidyverse)
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+# Install and load required packages
+
+# Create a data frame for the smiley face
+smiley_data <- data.frame(
+  x = c(-0.2, 0.2, -0.1, 0.1, -0.1, 0.1),  # X-coordinates
+  y = c(0.2, 0.2, 0, 0, -0.2, -0.2)       # Y-coordinates
+)
+
+# Create the base plot
+p <- ggplot(smiley_data, aes(x, y)) +
+  xlim(-1, 1) + ylim(-1, 1) +  # Set the plot limits
+  theme_void()                  # Remove background and axis
+
+# Add the face
+p <- p +
+ 
+  geom_point(aes(x = -0.3, y = 0.4), size = 10, color = "black") +
+  geom_point(aes(x = 0.3, y = 0.4), size = 10, color = "black")
+
+# Add the nose
+p <- p +
+  geom_point(aes(x = 0, y = 0.), size = 10, color = "red")
+
+# Add the smile
+p <- p +
+  geom_curve(
+    aes(x = -0.4, y = -0.6, xend = 0.4, yend = -0.6),
+    color = "black", size = 2, curvature = 0.4
+  )
+
+ 
+
+# Display the plot
+print(p)
+```

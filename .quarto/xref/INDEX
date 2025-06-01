@@ -1,0 +1,23 @@
+{
+  "index.qmd": {
+    "index.html": "fb51cda1"
+  },
+  "about.qmd": {
+    "about.html": "043979a1"
+  },
+  "poisson_earthquakes.Rmd": {
+    "poisson_earthquakes.html": "83f39e80"
+  },
+  "poisson_earthquakes.qmd": {
+    "poisson_earthquakes.html": "aec3377a"
+  },
+  "binomial_image.qmd": {
+    "binomial_image.html": "948b430c"
+  },
+  "poisson_introduction.qmd": {
+    "poisson_introduction.html": "4b66d467"
+  },
+  "binomial_introduction.qmd": {
+    "binomial_introduction.html": "2887f6f8"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "hash": "46cdc4dd61d3ccad968a412a27376c12",
+  "result": {
+    "markdown": "---\ntitle: \"poisson_introduction\"\nauthor: \"Brittany Alexandra\"\ndate: \"2025-06-01\"\n\nformat:\n  html:\n    theme: cerulean\n    toc: true\n    toc-depth: 2          \n    toc-location: left    \n    code-fold: true\n    code-tools: true\n\neditor_options: \n  markdown: \n    wrap: 72\n---\n\n\ntest test\n\n\n::: {.cell}\n\n```{.r .cell-code}\n# Load required libraries\nlibrary(ggplot2)\nlibrary(patchwork)  # For side-by-side plots\n\n# Create data for mu (positive values only)\nmu <- seq(0.01, 10, length.out = 500)\neta_from_mu <- log(mu)\ndf1 <- data.frame(mu = mu, eta = eta_from_mu)\n\n# Create data for eta (real number line)\neta <- seq(-5, 5, length.out = 500)\nmu_from_eta <- exp(eta)\ndf2 <- data.frame(eta = eta, mu = mu_from_eta)\n\n# Plot 1: Link function (log)\np1 <- ggplot(df1, aes(x = mu, y = eta)) +\n  geom_line(color = \"blue\", size = 1) +\n  labs(\n    title = \"Log Link Function: η = log(μ)\",\n    x = expression(mu ~ \"(mean of response)\"),\n    y = expression(eta ~ \"(linear predictor)\")\n  ) +\n  theme_minimal(base_size = 14)\n```\n\n::: {.cell-output .cell-output-stderr}\n```\nWarning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.\nℹ Please use `linewidth` instead.\n```\n:::\n\n```{.r .cell-code}\n# Plot 2: Inverse link function (exp)\np2 <- ggplot(df2, aes(x = eta, y = mu)) +\n  geom_line(color = \"forestgreen\", size = 1) +\n  labs(\n    title = \"Inverse Link Function: μ = exp(η)\",\n    x = expression(eta ~ \"(linear predictor)\"),\n    y = expression(mu ~ \"(mean of response)\")\n  ) +\n  theme_minimal(base_size = 14)\n\n# Combine the plots side by side\np1 \n```\n\n::: {.cell-output-display}\n![](poisson_introduction_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n\n```{.r .cell-code}\np2\n```\n\n::: {.cell-output-display}\n![](poisson_introduction_files/figure-html/unnamed-chunk-1-2.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "poisson_introduction_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
