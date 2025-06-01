@@ -19,10 +19,55 @@ editor_options:
 
 # Modelling processes that evolve randomly over time
 
+Welcome to the soft introduction into Poisson modelling in R!
+
+Many things in life can be modelled with the poisson process as it quite
+literally models the long-term average rate of which random events occur
+indepdently. Its subjectively the most widely used model of a point
+process in time, and is suitable for
+
+-   Inbound calls to a call center
+
+-   Unique visitors to a website
+
+-   Walk-in arrivals to a physical location (customers or patients)
+
+-   The frequency of volcanic eruptions
+
+When we first learn about Poisson models, it's tempting to think the
+response mean is modeled directly as $\mu_i = \beta_0 + \beta_1 x_i$,
+but this isn\'t actually valid. The mean must be non-negative, yet the
+linear predictor $\beta_0 + \beta_1 x_i$ can be any real number,
+including negative values. Therefore, modelling $\mu_i$ this way risks
+predicting impossible values (e.g. negative) values. To ensure
+$\mu_i > 0$, R (and the underlying GLM framework) uses a **log link**
+$\log(mu_i) = \beta_0 + \beta_1 x_i ⇒ \mu_i =exp(beta_0 + \beta_1 x_i)$
+This transformation guarantees that \$\\mu_i\$ is always positive, even
+if the linear predictor is negative. You can think of the model as being
+linear **on the log scale**. Further, due to the logarithmic
+transformation, we must interpret coefficients multiplicatively: a
+one-unit increase in $x$ is associated with a **multiplicative** change
+in $\mu_i$.
+
+These two plots help visualize how the Poisson model transforms values
+using a **log link**. The log ensures the model stays linear on the log
+scale, while the exponential ensures predictions for the mean response,
+μ, are always positive.
+
+-   The log link function transforms the expected value of our response
+    variable, $\mu$ (which must be ≥ 0) into a value on the real number
+    line. This is shown in the left plot: as $\mu$increases, η=log⁡(μ)
+    grows slowly but without bounds.
+
+-   Conversely, the inverse link function (right plot) transforms any
+    real-valued model prediction, n, back to a valid expected count
+    μ=exp⁡(η), which is always positive. This ensures our Poisson model
+    makes realistic predictions for count data.
+
 ```{r}
 # Load required libraries
 library(ggplot2)
-library(patchwork)  # For side-by-side plots
+
 
 # Create data for mu (positive values only)
 mu <- seq(0.01, 10, length.out = 500)
@@ -35,8 +80,8 @@ mu_from_eta <- exp(eta)
 df2 <- data.frame(eta = eta, mu = mu_from_eta)
 
 # Plot 1: Link function (log)
-p1 <- ggplot(df1, aes(x = mu, y = eta)) +
-  geom_line(color = "blue", size = 1) +
+ ggplot(df1, aes(x = mu, y = eta)) +
+  geom_line(color = "blue", linewidth = 1) +
   labs(
     title = "Log Link Function: η = log(μ)",
     x = expression(mu ~ "(mean of response)"),
@@ -45,16 +90,12 @@ p1 <- ggplot(df1, aes(x = mu, y = eta)) +
   theme_minimal(base_size = 14)
 
 # Plot 2: Inverse link function (exp)
-p2 <- ggplot(df2, aes(x = eta, y = mu)) +
-  geom_line(color = "forestgreen", size = 1) +
+ggplot(df2, aes(x = eta, y = mu)) +
+  geom_line(color = "forestgreen", linewidth = 1) +
   labs(
     title = "Inverse Link Function: μ = exp(η)",
     x = expression(eta ~ "(linear predictor)"),
     y = expression(mu ~ "(mean of response)")
   ) +
   theme_minimal(base_size = 14)
-
-# Combine the plots side by side
-p1 
-p2
 ```

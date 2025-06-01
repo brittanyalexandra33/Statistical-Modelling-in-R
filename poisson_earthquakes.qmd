@@ -37,16 +37,6 @@ where the formula for our statistical model is as follows:
 $Y_i \sim \text{Poisson}(\mu_i),$ where
 $\mu_i = \beta_0 + \beta_1 x_i\quad$
 
-Diving a bit into understanding the foundations of how we will use this
-statistical model in R... It is worth noting that we need to use a link
-function to map our parameter of interest, $\mu_i$ , to the real number
-line, where $log(\mu_i) = \beta_0 + \beta_1 x_i$.
-
-In other words, the expected value of our response variable, $\mu_i$,
-must be non negative $(\mu_i\ ≥ 0)$. However, because we are using a
-log-link function, the model actually estimates $\log(\mu_i)$ which can
-take on any real number, that is $- \infty < \log(\mu_i) < +\infty$
-
 Today, we will look at how to use the poisson distribution to model the
 occurrence of volcanic events per year in Country A. This country is
 composed of smaller areas that regularly record information on the
@@ -72,7 +62,8 @@ following:
 
 A quick note, *this blog is not focused on the exploratory part of this
 data, and will not go in-depth to all the metrics and terms used, but I
-aim to add another page soon explaining the terminology!*
+aim to add another page soon explaining the mathematics and reasoning
+behind each step!*
 
 ```{r setup, include=FALSE}
 
@@ -416,6 +407,20 @@ normcheck(glm_model3)
 # Step 4: Quantifying the impact of our variables on the frequency of earthquakes
 
 ------------------------------------------------------------------------
+
+Diving a bit into understanding the foundations of how we will use this
+statistical model in R... It is worth noting that we need to use a link
+function to map our parameter of interest, $\mu_i$ , to the real number
+line, where $log(\mu_i) = \beta_0 + \beta_1 x_i$.
+
+In other words, the expected value of our response variable, $\mu_i$,
+must be non negative $(\mu_i\ ≥ 0)$. However, because we are using a
+log-link function, the model actually estimates $\log(\mu_i)$ which can
+take on any real number, that is \$- \\infty \< \\log(\\mu_i) \<
++\\infty\$
+
+[Thus, when it comes to interpreting, we can conclude the
+below:]{.underline}
 
 We have evidence to reject the null hypothesis that the model is a good
 fit (pval : 0) .

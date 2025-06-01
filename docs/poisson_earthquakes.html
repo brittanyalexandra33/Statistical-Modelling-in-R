@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Brittany Alexandra">
+<meta name="dcterms.date" content="2025-06-01">
+
+<title>Statistical Modelling in R - Poisson Modelling</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistical Modelling in R</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-about" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
+ <span class="menu-text">About</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-about">    
+        <li class="dropdown-header">About</li>
+        <li>
+    <a class="dropdown-item" href="./index.html" rel="" target="">
+ <span class="dropdown-text">About</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-poisson-modelling" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
+ <span class="menu-text">Poisson Modelling</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-poisson-modelling">    
+        <li>
+    <a class="dropdown-item" href="./poisson_introduction.html" rel="" target="">
+ <span class="dropdown-text">Foundations in Poisson Modelling</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./poisson_earthquakes.html" rel="" target="">
+ <span class="dropdown-text">Poisson Modelling</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-binomial-modelling" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
+ <span class="menu-text">Binomial Modelling</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-binomial-modelling">    
+        <li>
+    <a class="dropdown-item" href="./binomial_introduction.html" rel="" target="">
+ <span class="dropdown-text">Foundations in Binomial Modelling</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./binomial_image.html" rel="" target="">
+ <span class="dropdown-text">Binomial Image Recognition</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/brittanyalexandra33" rel="" target=""><i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#step-1.-choosing-variables-to-include-in-the-model" id="toc-step-1.-choosing-variables-to-include-in-the-model" class="nav-link" data-scroll-target="#step-1.-choosing-variables-to-include-in-the-model">Step 1. Choosing variables to include in the model</a></li>
+  <li><a href="#step-2-fitting-the-model" id="toc-step-2-fitting-the-model" class="nav-link" data-scroll-target="#step-2-fitting-the-model">Step 2: Fitting the model</a></li>
+  <li><a href="#step-3-diagnostic-checks-on-our-chosen-model" id="toc-step-3-diagnostic-checks-on-our-chosen-model" class="nav-link" data-scroll-target="#step-3-diagnostic-checks-on-our-chosen-model">Step 3: Diagnostic checks on our chosen model</a></li>
+  <li><a href="#step-4-quantifying-the-impact-of-our-variables-on-the-frequency-of-earthquakes" id="toc-step-4-quantifying-the-impact-of-our-variables-on-the-frequency-of-earthquakes" class="nav-link" data-scroll-target="#step-4-quantifying-the-impact-of-our-variables-on-the-frequency-of-earthquakes">Step 4: Quantifying the impact of our variables on the frequency of earthquakes</a></li>
+  <li><a href="#step-5-adding-more-complexity-to-our-model-to-improve-its-explanatory-power" id="toc-step-5-adding-more-complexity-to-our-model-to-improve-its-explanatory-power" class="nav-link" data-scroll-target="#step-5-adding-more-complexity-to-our-model-to-improve-its-explanatory-power">Step 5: Adding more complexity to our model to improve its explanatory power</a></li>
+  <li><a href="#step-6-concluding-statements-and-interpretations-from-our-final-model" id="toc-step-6-concluding-statements-and-interpretations-from-our-final-model" class="nav-link" data-scroll-target="#step-6-concluding-statements-and-interpretations-from-our-final-model">Step 6: Concluding statements and interpretations from our final model</a></li>
+  <li><a href="#extra-mathematical-interpretation-of-our-model" id="toc-extra-mathematical-interpretation-of-our-model" class="nav-link" data-scroll-target="#extra-mathematical-interpretation-of-our-model">Extra : Mathematical interpretation of our model</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Poisson Modelling</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Brittany Alexandra </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 1, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<hr>
+<p>When is the next volcano due to erupt? Any moment now, unfortunately! (Give or take 1000 years or so).</p>
+<p>A volcano could happen this afternoon, or it might not happen for another 1000 years. Volcanoes are almost impossible to predict; they seem to happen completely at random.</p>
+<p>However, we do know of a statistical distribution that counts the number of events in a fixed space of time…the Poisson distribution! The Poisson process counts the number of events occurring in a fixed time or space, when events occur independently and at a constant average rate, where the formula for our statistical model is as follows:</p>
+<p><span class="math inline">\(Y_i \sim \text{Poisson}(\mu_i),\)</span> where <span class="math inline">\(\mu_i = \beta_0 + \beta_1 x_i\quad\)</span></p>
+<p>Today, we will look at how to use the poisson distribution to model the occurrence of volcanic events per year in Country A. This country is composed of smaller areas that regularly record information on the following:</p>
+<ul>
+<li><p>area.type: Categorical variable with 9 categories.</p></li>
+<li><p>total.land.area: Total land area in square kms</p></li>
+<li><p>total.area: Total area (including water) in square kms</p></li>
+<li><p>shape.length: Length of the shape of the area in kms</p></li>
+<li><p>UrbanRural: Recoded variable area.type into bigger categories</p></li>
+<li><p>previous.eruption: Number of previous volcanic eruptions in the are</p></li>
+<li><p>Y: Number of eruptions during the observation period. The observation time is ONE<br>
+year for all areas.</p></li>
+<li><p>earthquakes.year: Average number of earthquakes per year in the area</p></li>
+</ul>
+<p>A quick note, <em>this blog is not focused on the exploratory part of this data, and will not go in-depth to all the metrics and terms used, but I aim to add another page soon explaining the mathematics and reasoning behind each step!</em></p>
+</section>
+<section id="step-1.-choosing-variables-to-include-in-the-model" class="level1">
+<h1>Step 1. Choosing variables to include in the model</h1>
+<hr>
+<p>Each analysis begins with selecting which variables to include in our model. Contrary to intuition, we do <strong>not</strong> want to include every variable available — for several key reasons:</p>
+<ul>
+<li><p><strong>Occam’s Razor</strong> suggests that, all else equal, simpler models are preferable to more complex ones.</p></li>
+<li><p>Including too many variables can introduce <strong>multicollinearity</strong>, where highly correlated predictors make coefficient estimates unstable and unreliable.</p></li>
+</ul>
+<p><u><strong>The methods to identify appropriate explanatory variables are listed below (this is specific to our analysis):</strong></u></p>
+<ol type="1">
+<li><p><strong>Domain knowledge:</strong> Always the most important source of insight. <strong>Correlation plots:</strong> Useful for detecting multicollinearity between explanatory variables.</p></li>
+<li><p><strong>Chi-square tests:</strong> To test for associations between categorical variables.</p></li>
+<li><p><strong>Akaike Information Criterion (AIC):</strong> Balances model fit with model complexity to guide selection relative to comparative models.</p></li>
+</ol>
+<p>We aim to choose explanatory variables that are <strong>strongly associated with the response variable</strong> while avoiding those that are <strong>highly correlated with each other</strong>. We will walk through choosing appropriate variables to model our response, Y, with an example, focusing on the variables <code>area.type</code> and <code>UrbanRural</code></p>
+<p>In the pairs plot below, we can see <code>area.type</code> and <code>UrbanRural</code>are moderately colinear with a correlation of 0.42 and therefore only one should in the model.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs20x</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="poisson_earthquakes_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="domain-knowledge" class="level3">
+<h3 class="anchored" data-anchor-id="domain-knowledge">1.1 Domain Knowledge</h3>
+<p>It’s important to ask whether there <strong>is a contextual benefit</strong> to including <code>area.type</code> or <code>UrbanRural</code>. As we are interested in modelling the frequency of eruptions, and not the impact of specific area types, I am unbiased as to which variable we include in the model from a contextual standpoint.</p>
+</section>
+<section id="chi-square-tests" class="level3">
+<h3 class="anchored" data-anchor-id="chi-square-tests">1.2 Chi-square Tests</h3>
+<p>As established by our pairs plot, it looks like we face a few colinear variables, and we are interested in looking into <code>UrbanRural</code> and <code>area.type</code>.</p>
+<p>We can test the hypothesis that they both variables contain similar information using a chi-square test. This test <strong>checks for a statistically significant association between two categorical variables</strong>, with the null hypothesis being that there is there is no association between two categorical variables.</p>
+<p><span class="math display">\[
+H_0: \text{The two categorical variables are independent.}
+\]</span></p>
+<p>Below, we can see the test result has a small p-value of 0.0005, thus showing <strong>no evidence to reject the null hypothesis</strong> — suggesting that the distribution of <code>UrbanRural</code> and <code>area.type</code> categories is likely due to chance, and they are <strong>not significantly different</strong>.</p>
+<p>Given <code>area.type</code> and <code>UrbanRural</code> are not statistically different, and they have eight anad three levels, respectively, we will opt for the simpler explanatory variable with three levels, <code>UrbanRural</code>.</p>
+<p>Why do we want to <strong>reduce our model complexity?</strong> Well, <strong>simpler models are easier to interpret when we are quantifying their impact on the response</strong>. Remember, this is statistical modelling NOT machine learning. We need to be able to explain every part going on, and the effect each variable has on the result.</p>
+<p>From a computational standpoint, it enables a faster convergence of models, allows parameter coefficients to be more stable, and helps avoids overfitting.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a> <span class="co"># We can see that we have a small p-value of 0.00049 (p-val &lt; 0.05), therefore have no evidence to reject the null hypothesis that the observed distribution difference across the categories 'UrbanRural` and `area.type` is due to chance </span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>tabledata <span class="ot">&lt;-</span> <span class="fu">table</span>(data<span class="sc">$</span>UrbanRural, data<span class="sc">$</span>area.type)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>chiResult <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(tabledata, <span class="at">simulate.p.value =</span> <span class="cn">TRUE</span>, <span class="at">B =</span> <span class="dv">2000</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean summary</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Chi-squared test (with simulated p-value, B = 2000):</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chi-squared test (with simulated p-value, B = 2000):</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"X-squared ="</span>, <span class="fu">round</span>(chiResult<span class="sc">$</span>statistic, <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>X-squared = 37478 </code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Degrees of freedom ="</span>, chiResult<span class="sc">$</span>parameter, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Degrees of freedom = NA </code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"P-value ="</span>, <span class="fu">format.pval</span>(chiResult<span class="sc">$</span>p.value, <span class="at">digits =</span> <span class="dv">4</span>, <span class="at">eps =</span> <span class="fl">1e-4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>P-value = 0.0004998 </code></pre>
+</div>
+</div>
+</section>
+<section id="aic" class="level3">
+<h3 class="anchored" data-anchor-id="aic">1.3 AIC</h3>
+<p>AIC is a likelihood based metric often used to compare two statistical models. A lower AIC is favourable to a higher AIC, as it indicates a better blend of model complexity while still explaining the data well.</p>
+<p>It’s important to note that <strong>there is no single “correct” way to choose variables</strong>. For instance, <code>UrbanRural</code> has a slightly higher AIC (253157) than <code>area.type</code> (253043), but the difference is marginal and in my personal opinion, not worth incorporating into the model due to its additional levels. (UrbanRural has 3 levels while area.type has 5).</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> UrbanRural, <span class="at">family =</span> <span class="st">"poisson"</span>, <span class="at">data =</span> data)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> area.type, <span class="at">family =</span> <span class="st">"poisson"</span>, <span class="at">data =</span> data)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create comparison data frame</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>comparison <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Model =</span> <span class="fu">c</span>(<span class="st">"UrbanRural"</span>, <span class="st">"Area Type"</span>),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">AIC =</span> <span class="fu">c</span>(<span class="fu">AIC</span>(model1), <span class="fu">AIC</span>(model2)))</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Pretty table</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>comparison <span class="sc">%&gt;%</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="st">"html"</span>, <span class="at">caption =</span> <span class="st">"&lt;strong&gt; Model Comparison: AIC &lt;/strong&gt;"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>, <span class="st">"responsive"</span>), </span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>                <span class="at">position =</span> <span class="st">"center"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-striped table-hover table-condensed table-sm small" data-quarto-postprocess="true">
+<caption><strong>Model Comparison: AIC</strong></caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Model</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">AIC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">UrbanRural</td>
+<td style="text-align: right;">253157.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Area Type</td>
+<td style="text-align: right;">253042.8</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
+<p>Lastly, our plots indicate both variables follow similar distribution patterns. The effect of <code>Sea</code>, which only has three observations, is negligible and including it would risk biasing our model due to its higher proportion of earthquakes, but smaller sample size.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure categorical variables are factors</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">UrbanRural =</span> <span class="fu">factor</span>(UrbanRural),</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">area.type =</span> <span class="fu">factor</span>(area.type)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Add counts directly to data frame ---</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>data_urban <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(UrbanRural) <span class="sc">%&gt;%</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>data_area <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(area.type) <span class="sc">%&gt;%</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Plot for UrbanRural ---</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_urban, <span class="fu">aes</span>(<span class="at">x =</span> UrbanRural, <span class="at">y =</span> Y)) <span class="sc">+</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"lightpink"</span>) <span class="sc">+</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">fun =</span> max, <span class="at">geom =</span> <span class="st">"text"</span>,</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"n = "</span>, n)),</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">3</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Earthquakes per Urban/Rural Area"</span>,</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"UrbanRural"</span>,</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Earthquakes per Year"</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Plot for area.type ---</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_area, <span class="fu">aes</span>(<span class="at">x =</span> area.type, <span class="at">y =</span> Y)) <span class="sc">+</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"lightblue"</span>) <span class="sc">+</span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">fun =</span> max, <span class="at">geom =</span> <span class="st">"text"</span>,</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"n = "</span>, n)),</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">3</span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Earthquakes per Area Type"</span>,</span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Area Type"</span>,</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Earthquakes per Year"</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Combine plots side by side ---</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="poisson_earthquakes_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="1152"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="poisson_earthquakes_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid" width="1152"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="step-2-fitting-the-model" class="level1">
+<h1>Step 2: Fitting the model</h1>
+<hr>
+<p>Given that the response variable, Y, represents a count of discrete positive numbers, we have chosen to apply a generalized linear model that utilities a Poisson distribution to predict Y, the frequency of eruptions.</p>
+<p>To convert the expected average count of eruptions, denoted as µi, from the Poisson distribution into a linear predictor, we have used the <strong>log link function</strong>. This is because we must ensure all expected values are greater than 0 (our model should not output an expected negative amount of earthquakes!), account for non constant variance, and assume a discrete responses (we can’t have 2.5 earthquakes either! what would half an earthquake mean?)</p>
+<p>We have used explanatory variables; <code>previous.eruption</code>, <code>UrbanRural</code>, <code>earthquakes.year</code>, and <code>total.area</code>. All explanatory variables had significant contributions towards explaining model variance (pval : &lt;2e-16).</p>
+<p>We will initially fit a model with all the variables and see which is the optimal outcome based on which model has the lowest AIC, thereby penalizing model complexity and rewarding goodness of fit. In addition, We iteratively removed insignificant variables each model to final converge on glm_model4, which had the (subjectively) best combination of low AIC and low model complexity.</p>
+<p>However, not all assumptions were not satisfied, as we can see an increase in variance with an increase in the Y (number of eruptions) as the mean increases. If our model was perfect, our predicted values would follow closely to the purple line.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">############################################################</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Split data into test and training</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="do">############################################################</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>train_index <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(data<span class="sc">$</span>Y, <span class="at">p =</span> <span class="fl">0.8</span>, <span class="at">list =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> data[train_index, ]</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> data[<span class="sc">-</span>train_index, ]</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Fit model with all predictor variables and see what the model tries best with stepwise regression </span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>glm_model1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> previous.eruption <span class="sc">+</span> UrbanRural <span class="sc">+</span> shape.length <span class="sc">+</span> total.area <span class="sc">+</span> total.land.area <span class="sc">+</span> earthquakes.year, <span class="at">family =</span> <span class="st">"poisson"</span>, <span class="at">data =</span> train_data)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(glm_model1)</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>glm_model2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> previous.eruption <span class="sc">+</span> earthquakes.year <span class="sc">+</span> UrbanRural <span class="sc">+</span> total.area <span class="sc">+</span> shape.length, <span class="at">data =</span> train_data, <span class="at">family =</span> poisson)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(glm_model2)</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>glm_model3 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> UrbanRural <span class="sc">+</span> previous.eruption <span class="sc">+</span> earthquakes.year, <span class="at">data =</span> train_data, <span class="at">family =</span> poisson)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(glm_model3)</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Best model </span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>glm_model4 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> previous.eruption <span class="sc">+</span> earthquakes.year <span class="sc">+</span> UrbanRural <span class="sc">+</span> total.area, <span class="at">family =</span> poisson, <span class="at">data =</span> train_data)</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(glm_model4)</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="co"># MODEL COMPARISON </span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="co">#glm_model3 has the best median between low AIC and low model complexity </span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(glm_model1, glm_model2, glm_model3, glm_model4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>           df      AIC
+glm_model1  8 145993.3
+glm_model2  7 146019.0
+glm_model3  5 146651.3
+glm_model4  6 146088.2</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>predictions_glm4 <span class="ot">&lt;-</span> <span class="fu">predict</span>(glm_model4, <span class="at">newdata =</span> test_data, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>test_data<span class="sc">$</span>predictions_glm4 <span class="ot">&lt;-</span> predictions_glm4</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># kind of bad model </span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(test_data, <span class="fu">aes</span>(<span class="at">x =</span> Y, <span class="at">y =</span> predictions_glm4, <span class="at">col =</span> UrbanRural)) <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> Y, <span class="at">y =</span> Y), <span class="at">color =</span> <span class="st">"purple"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> <span class="co"># Ideal fit line</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Actual"</span>, <span class="at">y =</span> <span class="st">"Predicted"</span>, <span class="at">title =</span> <span class="st">"Actual vs. Predicted values from chosen Poisson model "</span>) <span class="sc">+</span> </span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="poisson_earthquakes_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit model with full data now </span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>glm_model3_full <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> UrbanRural <span class="sc">+</span> previous.eruption <span class="sc">+</span> earthquakes.year <span class="sc">+</span> total.area,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">family =</span> <span class="st">"poisson"</span>, <span class="at">data =</span> data)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(glm_model3_full)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="step-3-diagnostic-checks-on-our-chosen-model" class="level1">
+<h1>Step 3: Diagnostic checks on our chosen model</h1>
+<hr>
+<p>Below, we run diagnostic checks on our chosen model</p>
+<ol type="1">
+<li><p>The <strong>Chi-squared ANOVA</strong> checks if all levels are significant within our model. For example, the <code>UrbanRural</code> variable has 3 levels (<em>degrees of freedom +1</em>) , and we can see from the significant P-value of &lt;2.2e-16 that they are all significant.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># All levels are significant for our best model</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(glm_model4, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Deviance Table
+
+Model: poisson, link: log
+
+Response: Y
+
+Terms added sequentially (first to last)
+
+                  Df Deviance Resid. Df Resid. Dev  Pr(&gt;Chi)    
+NULL                              14993     159566              
+previous.eruption  1    55632     14992     103935 &lt; 2.2e-16 ***
+earthquakes.year   1      118     14991     103817 &lt; 2.2e-16 ***
+UrbanRural         2    10437     14989      93380 &lt; 2.2e-16 ***
+total.area         1      565     14988      92815 &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div></li>
+<li><p><strong>Cooks distance</strong> measures the influence of a specific data point on the overall model. For example, it quantifies how much the models predictions would change if these datapoints were removed. Below, we can see there are a few datapoints that clearly stick out, but all have a distance under 0.5 so we are not concerned about their influence.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A simple function to generate a cooks distance plot </span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cooks20x</span>(glm_model3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="poisson_earthquakes_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div></li>
+<li><p>We use a <strong>normality check</strong> to see how the residuals of our model are distributed. Residuals are the differences between the observed values and the values predicted by out model, simply put as</p></li>
+</ol>
+<p><span class="math display">\[
+r_i = y_i - \hat{y}_i$.
+\]</span></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">normcheck</span>(glm_model3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="poisson_earthquakes_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="step-4-quantifying-the-impact-of-our-variables-on-the-frequency-of-earthquakes" class="level1">
+<h1>Step 4: Quantifying the impact of our variables on the frequency of earthquakes</h1>
+<hr>
+<p>Diving a bit into understanding the foundations of how we will use this statistical model in R… It is worth noting that we need to use a link function to map our parameter of interest, <span class="math inline">\(\mu_i\)</span> , to the real number line, where <span class="math inline">\(log(\mu_i) = \beta_0 + \beta_1 x_i\)</span>.</p>
+<p>In other words, the expected value of our response variable, <span class="math inline">\(\mu_i\)</span>, must be non negative <span class="math inline">\((\mu_i\ ≥ 0)\)</span>. However, because we are using a log-link function, the model actually estimates <span class="math inline">\(\log(\mu_i)\)</span> which can take on any real number, that is $- \infty &lt; \log(\mu_i) &lt; +\infty$</p>
+<p><u>Thus, when it comes to interpreting, we can conclude the below:</u></p>
+<p>We have evidence to reject the null hypothesis that the model is a good fit (pval : 0) .</p>
+<p>All variables were significant in explaining the variance in our response (p-val &lt; 0.05).</p>
+<p>However, we can visually see that this model still offers some useful information from the above plot.</p>
+<p>Holding all other variables constant:</p>
+<ul>
+<li><p>We estimate that, for every 1 square km increase in total area, the expected number of eruptions for a given time period increases by 1.86%</p></li>
+<li><p>We estimate that, for every 1 unit increase in previous eruptions, the expected number of eruptions for a given time period decrease by 76.61%</p></li>
+<li><p>We estimate that, for every 1 unit increase in earthquakes.year (average number of earthquakes per year in the area), the expected number of eruptions for a given time period increase by 4.13%.</p></li>
+<li><p>We estimate that the expected number of earthquakes in a given time period for the “Settlement” Urban Rural category is 26.3% higher than the expected number of earthquakes in the “Other” category.</p></li>
+<li><p>We estimate that the expected number of earthquakes in a given time period for the “Urban” Urban Rural category is 44.84% lower than the expected number of earthquakes in the “Other” category.</p></li>
+</ul>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_model3_full) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Y ~ UrbanRural + previous.eruption + earthquakes.year + 
+    total.area, family = "poisson", data = data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-6.9865  -2.3027  -0.7174   1.2060  10.2700  
+
+Coefficients:
+                             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                 3.1674850  0.0079876  396.55   &lt;2e-16 ***
+UrbanRuralRural settlement  0.2337399  0.0131489   17.78   &lt;2e-16 ***
+UrbanRuralUrban            -0.5950103  0.0078943  -75.37   &lt;2e-16 ***
+previous.eruption          -1.4528968  0.0070815 -205.17   &lt;2e-16 ***
+earthquakes.year            0.0404475  0.0027978   14.46   &lt;2e-16 ***
+total.area                  0.0184193  0.0006451   28.55   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 200101  on 18738  degrees of freedom
+Residual deviance: 116577  on 18733  degrees of freedom
+AIC: 183123
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="dv">100</span><span class="sc">*</span>(<span class="fu">exp</span>(<span class="fu">coef</span>(glm_model3_full))<span class="sc">-</span><span class="dv">1</span>)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>               (Intercept) UrbanRuralRural settlement 
+               2274.768259                  26.331584 
+           UrbanRuralUrban          previous.eruption 
+                -44.844311                 -76.610823 
+          earthquakes.year                 total.area 
+                  4.127662                   1.858996 </code></pre>
+</div>
+</div>
+</section>
+<section id="step-5-adding-more-complexity-to-our-model-to-improve-its-explanatory-power" class="level1">
+<h1>Step 5: Adding more complexity to our model to improve its explanatory power</h1>
+<hr>
+<p>Great! Now that we have established our baseline model, it’s time to see how we can improve it one way to do this is by adding interaction effects. Interaction effects take into account the effect of one explanatory variable on the response variable, depending on the level of another explanatory variable. For example, our <code>UrbanRural</code> variable has 3 levels, and the effect of each level on the response may differ based on the other explanatory variables.</p>
+<p>Below, we explore one interaction effect, and notice a distinction between previous.eruption and earthquakes.year. The interaction was fit and kept due it’s significant p-value (pval : &lt; 2.2e-16).</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Lets investigate the relationships</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> previous.eruption<span class="sc">*</span>earthquakes.year, <span class="at">data =</span> data, <span class="at">family =</span> poisson)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="fu">interact_plot</span>(fit1, <span class="at">pred =</span> previous.eruption, <span class="at">modx =</span> earthquakes.year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="poisson_earthquakes_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>After comparing our previous simple poisson model, with our current poisson model with an interaction effect, we can see the interaction model actually provides a lower AIC!</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit model with full data now </span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>glm_model5 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> previous.eruption<span class="sc">*</span>earthquakes.year <span class="sc">+</span> UrbanRural <span class="sc">+</span> total.area, <span class="at">family =</span> poisson, <span class="at">data =</span> data)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_model5) <span class="co"># All significant </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Y ~ previous.eruption * earthquakes.year + UrbanRural + 
+    total.area, family = poisson, data = data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-6.9849  -2.0430  -0.5682   1.2069   9.8643  
+
+Coefficients:
+                                    Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                         3.121215   0.008044  388.01   &lt;2e-16 ***
+previous.eruption                  -1.002563   0.009295 -107.87   &lt;2e-16 ***
+earthquakes.year                    0.093767   0.002908   32.24   &lt;2e-16 ***
+UrbanRuralRural settlement          0.233251   0.013147   17.74   &lt;2e-16 ***
+UrbanRuralUrban                    -0.597354   0.007891  -75.70   &lt;2e-16 ***
+total.area                          0.018134   0.000645   28.12   &lt;2e-16 ***
+previous.eruption:earthquakes.year -0.599499   0.010139  -59.12   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 200101  on 18738  degrees of freedom
+Residual deviance: 112713  on 18732  degrees of freedom
+AIC: 179261
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(glm_model4, glm_model5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in AIC.default(glm_model4, glm_model5): models are not all fitted to
+the same number of observations</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           df      AIC
+glm_model4  6 146088.2
+glm_model5  7 179261.2</code></pre>
+</div>
+</div>
+<p>We can also see the predictions from this model perform slightly better than our previous model.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="co"># SHOW PREDICTIONS</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>predictions_glm5 <span class="ot">&lt;-</span> <span class="fu">predict</span>(glm_model5, <span class="at">newdata =</span> test_data, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>test_data<span class="sc">$</span>predictions_glm5 <span class="ot">&lt;-</span> predictions_glm5</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="co"># kind of bad model </span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(test_data, <span class="fu">aes</span>(<span class="at">x =</span> Y, <span class="at">y =</span> predictions_glm5, <span class="at">col =</span> UrbanRural)) <span class="sc">+</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> Y, <span class="at">y =</span> Y), <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> <span class="co"># Ideal fit line</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Actual"</span>, <span class="at">y =</span> <span class="st">"Predicted"</span>, <span class="at">title =</span> <span class="st">"Actual vs. Predicted Poisson model "</span>) <span class="sc">+</span> </span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="poisson_earthquakes_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Similar to step Step 2, we must run diagnostic checks on our model. After all, we can’t blindly code something and believe it to be accurate!</p>
+<p>We can see our interaction is significant with a p-value of &lt;2.2e-17</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(glm_model5, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Deviance Table
+
+Model: poisson, link: log
+
+Response: Y
+
+Terms added sequentially (first to last)
+
+                                   Df Deviance Resid. Df Resid. Dev  Pr(&gt;Chi)
+NULL                                               18738     200101          
+previous.eruption                   1    69679     18737     130423 &lt; 2.2e-16
+earthquakes.year                    1      184     18736     130238 &lt; 2.2e-16
+UrbanRural                          2    12950     18734     117288 &lt; 2.2e-16
+total.area                          1      711     18733     116577 &lt; 2.2e-16
+previous.eruption:earthquakes.year  1     3864     18732     112713 &lt; 2.2e-16
+                                      
+NULL                                  
+previous.eruption                  ***
+earthquakes.year                   ***
+UrbanRural                         ***
+total.area                         ***
+previous.eruption:earthquakes.year ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ##############################</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># # Diagnostic checks</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ##############################</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># cooks20x(glm_model5)</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(glm_model5, lty = 2, pch = substr(data$UrbanRural, 1, 1))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="step-6-concluding-statements-and-interpretations-from-our-final-model" class="level1">
+<h1>Step 6: Concluding statements and interpretations from our final model</h1>
+<hr>
+<p>As the response variable, number of eruptions during the observation period, is a count, we have fit a generalized linear model with a Poisson response distribution.</p>
+<p>We have 5 significant explanatory terms (pval all &lt;0.05); earthquakes.year, total.area, previous.eruption, total.area, and UrbanRural. The interaction plot above suggests a difference between the expected number of eruptions depending on how many eruptions there were in the previous year (per area) and the average number of eruptions (per area).</p>
+<p>Hence, a poisson model with an interaction term between previous.eruption and earthquakes.year was fit. The interaction term was significant (pval : &lt; 2e-16) so it remained in the model.</p>
+<p>All assumptions were satisfied. However, we still cannot trust the results from the Poisson model (pval: 0 )</p>
+<p>Holding all other variables constant…</p>
+<ul>
+<li><p>We estimate that, for every 1 unit increase in the number of previous volcanic eruptions (previous.eruptions), the expected number eruptions in a given time period decreases by 63.3%.</p>
+<ul>
+<li>This is further decreased by 45.1% for every increase in the average number of earthquakes per year in the area (earthquakes.year)</li>
+</ul></li>
+<li><p>We estimate that, for every 1 unit increase in the number of average earthquakes per year, the expected number of eruptions in a given time period increases by 9.83%.</p>
+<ul>
+<li>There is further decreased by 45.1% for every increase the number of previous volcanic eruptions (previous.eruption).</li>
+</ul></li>
+<li><p>We estimate that, for every 1 square km increase in total area, the expected number of eruptions in a given time period increases by 1.83%</p></li>
+<li><p>We estimate that the expected number of eruptions in a given time period is 44.97% lower in “Urban” (UrbanRural) areas compared to “Other” areas</p></li>
+<li><p>We estimate that the expected number of eruptions in a given period is 26.27% higher in “Settlement” (UrbanRural) areas compared to “Other areas”</p></li>
+</ul>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_model5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Y ~ previous.eruption * earthquakes.year + UrbanRural + 
+    total.area, family = poisson, data = data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-6.9849  -2.0430  -0.5682   1.2069   9.8643  
+
+Coefficients:
+                                    Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                         3.121215   0.008044  388.01   &lt;2e-16 ***
+previous.eruption                  -1.002563   0.009295 -107.87   &lt;2e-16 ***
+earthquakes.year                    0.093767   0.002908   32.24   &lt;2e-16 ***
+UrbanRuralRural settlement          0.233251   0.013147   17.74   &lt;2e-16 ***
+UrbanRuralUrban                    -0.597354   0.007891  -75.70   &lt;2e-16 ***
+total.area                          0.018134   0.000645   28.12   &lt;2e-16 ***
+previous.eruption:earthquakes.year -0.599499   0.010139  -59.12   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 200101  on 18738  degrees of freedom
+Residual deviance: 112713  on 18732  degrees of freedom
+AIC: 179261
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pval_glm_model5 &lt;- 1 - pchisq(90402, 14987)</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="co"># print(paste("We cannot still trust the most optimal model found as it has a small p-value of", pval_glm_model5, "indicating the poisson model does not provide a good fit "))</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Interpreting coefficients</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="dv">100</span><span class="sc">*</span>(<span class="fu">exp</span>(<span class="fu">coef</span>(glm_model5))<span class="sc">-</span><span class="dv">1</span>)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                       (Intercept)                  previous.eruption 
+                       2167.392233                         -63.306220 
+                  earthquakes.year         UrbanRuralRural settlement 
+                          9.830385                          26.269789 
+                   UrbanRuralUrban                         total.area 
+                        -44.973416                           1.829907 
+previous.eruption:earthquakes.year 
+                        -45.091323 </code></pre>
+</div>
+</div>
+</section>
+<section id="extra-mathematical-interpretation-of-our-model" class="level1">
+<h1>Extra : Mathematical interpretation of our model</h1>
+<hr>
+<p><u>Our final model is:</u></p>
+<p><span class="math display">\[
+log(\mu_i)=\beta_0+\beta_1p_i+\beta_2e_i+\beta_3s_i+\beta_4u_i+\beta_5t_i+\beta_6p_ie_i
+\]</span></p>
+<p>Where :</p>
+<ul>
+<li><p><span class="math inline">\(\mu_i\)</span> is the number of eruptions during the observation period and Y (the expected number of eruptions in the “Other” Urban Area) has a poisson distribution with mean <span class="math inline">\(\mu_i\)</span></p></li>
+<li><p><span class="math inline">\(\text{p}_{i}\)</span> represents the number of previous eruptions in the area</p></li>
+<li><p><span class="math inline">\(\text{e}_{i}\)</span> represents the average number of earthquakes per year in the area</p></li>
+<li><p>The factor variable <span class="math inline">\(\text{UrbanRural}\)</span> has 3 dummy variables where <span class="math inline">\(\text{s}_{i}\)</span> takes the value 1 if the observation is from Settlement and 0 otherwise. In addition <span class="math inline">\(\text{u}_{i}\)</span> takes the value 1 if the observation is from Urban, and 0 otherwise.</p></li>
+<li><p><span class="math inline">\(\text{t}_{i}\)</span> represents the total area (including water) in square km.</p></li>
+</ul>
+<p>Here, “Other” (within the <code>UrbanRural</code> factor) is our baseline level.</p>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb41" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Poisson Modelling"</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Brittany Alexandra"</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "`r Sys.Date()`"</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="co">    theme: cerulean</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 2          </span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-location: left    </span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a><span class="an">editor_options:</span><span class="co"> </span></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a><span class="co">  markdown: </span></span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a><span class="co">    wrap: 72</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a><span class="fu"># Introduction</span></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>------------------------------------------------------------------------</span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a>When is the next volcano due to erupt? Any moment now, unfortunately!</span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>(Give or take 1000 years or so).</span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>A volcano could happen this afternoon, or it might not happen for</span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>another 1000 years. Volcanoes are almost impossible to predict; they</span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>seem to happen completely at random.</span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>However, we do know of a statistical distribution that counts the number</span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a>of events in a fixed space of time...the Poisson distribution! The</span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a>Poisson process counts the number of events occurring in a fixed time or</span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a>space, when events occur independently and at a constant average rate,</span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a>where the formula for our statistical model is as follows:</span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-37"><a href="#cb41-37" aria-hidden="true" tabindex="-1"></a>$Y_i \sim \text{Poisson}(\mu_i),$ where</span>
+<span id="cb41-38"><a href="#cb41-38" aria-hidden="true" tabindex="-1"></a>$\mu_i = \beta_0 + \beta_1 x_i\quad$</span>
+<span id="cb41-39"><a href="#cb41-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-40"><a href="#cb41-40" aria-hidden="true" tabindex="-1"></a>Today, we will look at how to use the poisson distribution to model the</span>
+<span id="cb41-41"><a href="#cb41-41" aria-hidden="true" tabindex="-1"></a>occurrence of volcanic events per year in Country A. This country is</span>
+<span id="cb41-42"><a href="#cb41-42" aria-hidden="true" tabindex="-1"></a>composed of smaller areas that regularly record information on the</span>
+<span id="cb41-43"><a href="#cb41-43" aria-hidden="true" tabindex="-1"></a>following:</span>
+<span id="cb41-44"><a href="#cb41-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-45"><a href="#cb41-45" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>area.type: Categorical variable with 9 categories.</span>
+<span id="cb41-46"><a href="#cb41-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-47"><a href="#cb41-47" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>total.land.area: Total land area in square kms</span>
+<span id="cb41-48"><a href="#cb41-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-49"><a href="#cb41-49" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>total.area: Total area (including water) in square kms</span>
+<span id="cb41-50"><a href="#cb41-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-51"><a href="#cb41-51" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>shape.length: Length of the shape of the area in kms</span>
+<span id="cb41-52"><a href="#cb41-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-53"><a href="#cb41-53" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>UrbanRural: Recoded variable area.type into bigger categories</span>
+<span id="cb41-54"><a href="#cb41-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-55"><a href="#cb41-55" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>previous.eruption: Number of previous volcanic eruptions in the are</span>
+<span id="cb41-56"><a href="#cb41-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-57"><a href="#cb41-57" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Y: Number of eruptions during the observation period. The</span>
+<span id="cb41-58"><a href="#cb41-58" aria-hidden="true" tabindex="-1"></a>    observation time is ONE\</span>
+<span id="cb41-59"><a href="#cb41-59" aria-hidden="true" tabindex="-1"></a>    year for all areas.</span>
+<span id="cb41-60"><a href="#cb41-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-61"><a href="#cb41-61" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>earthquakes.year: Average number of earthquakes per year in the area</span>
+<span id="cb41-62"><a href="#cb41-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-63"><a href="#cb41-63" aria-hidden="true" tabindex="-1"></a>A quick note, *this blog is not focused on the exploratory part of this</span>
+<span id="cb41-64"><a href="#cb41-64" aria-hidden="true" tabindex="-1"></a>data, and will not go in-depth to all the metrics and terms used, but I</span>
+<span id="cb41-65"><a href="#cb41-65" aria-hidden="true" tabindex="-1"></a>aim to add another page soon explaining the mathematics and reasoning</span>
+<span id="cb41-66"><a href="#cb41-66" aria-hidden="true" tabindex="-1"></a>behind each step!*</span>
+<span id="cb41-67"><a href="#cb41-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-68"><a href="#cb41-68" aria-hidden="true" tabindex="-1"></a><span class="in">```{r setup, include=FALSE}</span></span>
+<span id="cb41-69"><a href="#cb41-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-70"><a href="#cb41-70" aria-hidden="true" tabindex="-1"></a><span class="co"># Load packages</span></span>
+<span id="cb41-71"><a href="#cb41-71" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">echo =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb41-72"><a href="#cb41-72" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb41-73"><a href="#cb41-73" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(s20x)</span>
+<span id="cb41-74"><a href="#cb41-74" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb41-75"><a href="#cb41-75" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GGally)</span>
+<span id="cb41-76"><a href="#cb41-76" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(interactions)</span>
+<span id="cb41-77"><a href="#cb41-77" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb41-78"><a href="#cb41-78" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(prettydoc)</span>
+<span id="cb41-79"><a href="#cb41-79" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb41-80"><a href="#cb41-80" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb41-81"><a href="#cb41-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-82"><a href="#cb41-82" aria-hidden="true" tabindex="-1"></a><span class="co"># Read data </span></span>
+<span id="cb41-83"><a href="#cb41-83" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/poisson_earthquakes/data_areas.csv"</span>)</span>
+<span id="cb41-84"><a href="#cb41-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-85"><a href="#cb41-85" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to factor, otherwise cannot pairs plot categorical variables  </span></span>
+<span id="cb41-86"><a href="#cb41-86" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>UrbanRural <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(data<span class="sc">$</span>UrbanRural)</span>
+<span id="cb41-87"><a href="#cb41-87" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>area.type <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(data<span class="sc">$</span>area.type)</span>
+<span id="cb41-88"><a href="#cb41-88" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>Y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(data<span class="sc">$</span>Y)</span>
+<span id="cb41-89"><a href="#cb41-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-90"><a href="#cb41-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-91"><a href="#cb41-91" aria-hidden="true" tabindex="-1"></a><span class="fu"># Step 1. Choosing variables to include in the model</span></span>
+<span id="cb41-92"><a href="#cb41-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-93"><a href="#cb41-93" aria-hidden="true" tabindex="-1"></a>------------------------------------------------------------------------</span>
+<span id="cb41-94"><a href="#cb41-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-95"><a href="#cb41-95" aria-hidden="true" tabindex="-1"></a>Each analysis begins with selecting which variables to include in our</span>
+<span id="cb41-96"><a href="#cb41-96" aria-hidden="true" tabindex="-1"></a>model. Contrary to intuition, we do **not** want to include every</span>
+<span id="cb41-97"><a href="#cb41-97" aria-hidden="true" tabindex="-1"></a>variable available --- for several key reasons:</span>
+<span id="cb41-98"><a href="#cb41-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-99"><a href="#cb41-99" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>**Occam's Razor** suggests that, all else equal, simpler models are</span>
+<span id="cb41-100"><a href="#cb41-100" aria-hidden="true" tabindex="-1"></a>    preferable to more complex ones.</span>
+<span id="cb41-101"><a href="#cb41-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-102"><a href="#cb41-102" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Including too many variables can introduce **multicollinearity**,</span>
+<span id="cb41-103"><a href="#cb41-103" aria-hidden="true" tabindex="-1"></a>    where highly correlated predictors make coefficient estimates</span>
+<span id="cb41-104"><a href="#cb41-104" aria-hidden="true" tabindex="-1"></a>    unstable and unreliable.</span>
+<span id="cb41-105"><a href="#cb41-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-106"><a href="#cb41-106" aria-hidden="true" tabindex="-1"></a>[**The methods to identify appropriate explanatory variables are listed</span>
+<span id="cb41-107"><a href="#cb41-107" aria-hidden="true" tabindex="-1"></a>below (this is specific to our analysis):**]{.underline}</span>
+<span id="cb41-108"><a href="#cb41-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-109"><a href="#cb41-109" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>**Domain knowledge:** Always the most important source of insight.</span>
+<span id="cb41-110"><a href="#cb41-110" aria-hidden="true" tabindex="-1"></a>    **Correlation plots:** Useful for detecting multicollinearity</span>
+<span id="cb41-111"><a href="#cb41-111" aria-hidden="true" tabindex="-1"></a>    between explanatory variables.</span>
+<span id="cb41-112"><a href="#cb41-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-113"><a href="#cb41-113" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>**Chi-square tests:** To test for associations between categorical</span>
+<span id="cb41-114"><a href="#cb41-114" aria-hidden="true" tabindex="-1"></a>    variables.</span>
+<span id="cb41-115"><a href="#cb41-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-116"><a href="#cb41-116" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>**Akaike Information Criterion (AIC):** Balances model fit with</span>
+<span id="cb41-117"><a href="#cb41-117" aria-hidden="true" tabindex="-1"></a>    model complexity to guide selection relative to comparative models.</span>
+<span id="cb41-118"><a href="#cb41-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-119"><a href="#cb41-119" aria-hidden="true" tabindex="-1"></a>We aim to choose explanatory variables that are **strongly associated</span>
+<span id="cb41-120"><a href="#cb41-120" aria-hidden="true" tabindex="-1"></a>with the response variable** while avoiding those that are **highly</span>
+<span id="cb41-121"><a href="#cb41-121" aria-hidden="true" tabindex="-1"></a>correlated with each other**. We will walk through choosing appropriate</span>
+<span id="cb41-122"><a href="#cb41-122" aria-hidden="true" tabindex="-1"></a>variables to model our response, Y, with an example, focusing on the</span>
+<span id="cb41-123"><a href="#cb41-123" aria-hidden="true" tabindex="-1"></a>variables <span class="in">`area.type`</span> and <span class="in">`UrbanRural`</span></span>
+<span id="cb41-124"><a href="#cb41-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-125"><a href="#cb41-125" aria-hidden="true" tabindex="-1"></a>In the pairs plot below, we can see <span class="in">`area.type`</span> and <span class="in">`UrbanRural`</span>are</span>
+<span id="cb41-126"><a href="#cb41-126" aria-hidden="true" tabindex="-1"></a>moderately colinear with a correlation of 0.42 and therefore only one</span>
+<span id="cb41-127"><a href="#cb41-127" aria-hidden="true" tabindex="-1"></a>should in the model.</span>
+<span id="cb41-128"><a href="#cb41-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-131"><a href="#cb41-131" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-132"><a href="#cb41-132" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs20x</span>(data)</span>
+<span id="cb41-133"><a href="#cb41-133" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-134"><a href="#cb41-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-135"><a href="#cb41-135" aria-hidden="true" tabindex="-1"></a><span class="fu">### 1.1 Domain Knowledge</span></span>
+<span id="cb41-136"><a href="#cb41-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-137"><a href="#cb41-137" aria-hidden="true" tabindex="-1"></a>It's important to ask whether there **is a contextual benefit** to</span>
+<span id="cb41-138"><a href="#cb41-138" aria-hidden="true" tabindex="-1"></a>including <span class="in">`area.type`</span> or <span class="in">`UrbanRural`</span>. As we are interested in modelling</span>
+<span id="cb41-139"><a href="#cb41-139" aria-hidden="true" tabindex="-1"></a>the frequency of eruptions, and not the impact of specific area types, I</span>
+<span id="cb41-140"><a href="#cb41-140" aria-hidden="true" tabindex="-1"></a>am unbiased as to which variable we include in the model from a</span>
+<span id="cb41-141"><a href="#cb41-141" aria-hidden="true" tabindex="-1"></a>contextual standpoint.</span>
+<span id="cb41-142"><a href="#cb41-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-143"><a href="#cb41-143" aria-hidden="true" tabindex="-1"></a><span class="fu">### 1.2 Chi-square Tests</span></span>
+<span id="cb41-144"><a href="#cb41-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-145"><a href="#cb41-145" aria-hidden="true" tabindex="-1"></a>As established by our pairs plot, it looks like we face a few colinear</span>
+<span id="cb41-146"><a href="#cb41-146" aria-hidden="true" tabindex="-1"></a>variables, and we are interested in looking into <span class="in">`UrbanRural`</span> and</span>
+<span id="cb41-147"><a href="#cb41-147" aria-hidden="true" tabindex="-1"></a><span class="in">`area.type`</span>.</span>
+<span id="cb41-148"><a href="#cb41-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-149"><a href="#cb41-149" aria-hidden="true" tabindex="-1"></a>We can test the hypothesis that they both variables contain similar</span>
+<span id="cb41-150"><a href="#cb41-150" aria-hidden="true" tabindex="-1"></a>information using a chi-square test. This test **checks for a</span>
+<span id="cb41-151"><a href="#cb41-151" aria-hidden="true" tabindex="-1"></a>statistically significant association between two categorical</span>
+<span id="cb41-152"><a href="#cb41-152" aria-hidden="true" tabindex="-1"></a>variables**, with the null hypothesis being that there is there is no</span>
+<span id="cb41-153"><a href="#cb41-153" aria-hidden="true" tabindex="-1"></a>association between two categorical variables.</span>
+<span id="cb41-154"><a href="#cb41-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-155"><a href="#cb41-155" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb41-156"><a href="#cb41-156" aria-hidden="true" tabindex="-1"></a>H_0: \text{The two categorical variables are independent.}</span>
+<span id="cb41-157"><a href="#cb41-157" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb41-158"><a href="#cb41-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-159"><a href="#cb41-159" aria-hidden="true" tabindex="-1"></a>Below, we can see the test result has a small p-value of 0.0005, thus</span>
+<span id="cb41-160"><a href="#cb41-160" aria-hidden="true" tabindex="-1"></a>showing **no evidence to reject the null hypothesis** --- suggesting</span>
+<span id="cb41-161"><a href="#cb41-161" aria-hidden="true" tabindex="-1"></a>that the distribution of <span class="in">`UrbanRural`</span> and <span class="in">`area.type`</span> categories is</span>
+<span id="cb41-162"><a href="#cb41-162" aria-hidden="true" tabindex="-1"></a>likely due to chance, and they are **not significantly different**.</span>
+<span id="cb41-163"><a href="#cb41-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-164"><a href="#cb41-164" aria-hidden="true" tabindex="-1"></a>Given <span class="in">`area.type`</span> and <span class="in">`UrbanRural`</span> are not statistically different, and</span>
+<span id="cb41-165"><a href="#cb41-165" aria-hidden="true" tabindex="-1"></a>they have eight anad three levels, respectively, we will opt for the</span>
+<span id="cb41-166"><a href="#cb41-166" aria-hidden="true" tabindex="-1"></a>simpler explanatory variable with three levels, <span class="in">`UrbanRural`</span>.</span>
+<span id="cb41-167"><a href="#cb41-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-168"><a href="#cb41-168" aria-hidden="true" tabindex="-1"></a>Why do we want to **reduce our model complexity?** Well, **simpler</span>
+<span id="cb41-169"><a href="#cb41-169" aria-hidden="true" tabindex="-1"></a>models are easier to interpret when we are quantifying their impact on</span>
+<span id="cb41-170"><a href="#cb41-170" aria-hidden="true" tabindex="-1"></a>the response**. Remember, this is statistical modelling NOT machine</span>
+<span id="cb41-171"><a href="#cb41-171" aria-hidden="true" tabindex="-1"></a>learning. We need to be able to explain every part going on, and the</span>
+<span id="cb41-172"><a href="#cb41-172" aria-hidden="true" tabindex="-1"></a>effect each variable has on the result.</span>
+<span id="cb41-173"><a href="#cb41-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-174"><a href="#cb41-174" aria-hidden="true" tabindex="-1"></a>From a computational standpoint, it enables a faster convergence of</span>
+<span id="cb41-175"><a href="#cb41-175" aria-hidden="true" tabindex="-1"></a>models, allows parameter coefficients to be more stable, and helps</span>
+<span id="cb41-176"><a href="#cb41-176" aria-hidden="true" tabindex="-1"></a>avoids overfitting.</span>
+<span id="cb41-177"><a href="#cb41-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-180"><a href="#cb41-180" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-181"><a href="#cb41-181" aria-hidden="true" tabindex="-1"></a> <span class="co"># We can see that we have a small p-value of 0.00049 (p-val &lt; 0.05), therefore have no evidence to reject the null hypothesis that the observed distribution difference across the categories 'UrbanRural` and `area.type` is due to chance </span></span>
+<span id="cb41-182"><a href="#cb41-182" aria-hidden="true" tabindex="-1"></a>tabledata <span class="ot">&lt;-</span> <span class="fu">table</span>(data<span class="sc">$</span>UrbanRural, data<span class="sc">$</span>area.type)</span>
+<span id="cb41-183"><a href="#cb41-183" aria-hidden="true" tabindex="-1"></a>chiResult <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(tabledata, <span class="at">simulate.p.value =</span> <span class="cn">TRUE</span>, <span class="at">B =</span> <span class="dv">2000</span>)</span>
+<span id="cb41-184"><a href="#cb41-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-185"><a href="#cb41-185" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean summary</span></span>
+<span id="cb41-186"><a href="#cb41-186" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Chi-squared test (with simulated p-value, B = 2000):</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb41-187"><a href="#cb41-187" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"X-squared ="</span>, <span class="fu">round</span>(chiResult<span class="sc">$</span>statistic, <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb41-188"><a href="#cb41-188" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Degrees of freedom ="</span>, chiResult<span class="sc">$</span>parameter, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb41-189"><a href="#cb41-189" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"P-value ="</span>, <span class="fu">format.pval</span>(chiResult<span class="sc">$</span>p.value, <span class="at">digits =</span> <span class="dv">4</span>, <span class="at">eps =</span> <span class="fl">1e-4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb41-190"><a href="#cb41-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-191"><a href="#cb41-191" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-192"><a href="#cb41-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-193"><a href="#cb41-193" aria-hidden="true" tabindex="-1"></a><span class="fu">### 1.3 AIC</span></span>
+<span id="cb41-194"><a href="#cb41-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-195"><a href="#cb41-195" aria-hidden="true" tabindex="-1"></a>AIC is a likelihood based metric often used to compare two statistical</span>
+<span id="cb41-196"><a href="#cb41-196" aria-hidden="true" tabindex="-1"></a>models. A lower AIC is favourable to a higher AIC, as it indicates a</span>
+<span id="cb41-197"><a href="#cb41-197" aria-hidden="true" tabindex="-1"></a>better blend of model complexity while still explaining the data well.</span>
+<span id="cb41-198"><a href="#cb41-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-199"><a href="#cb41-199" aria-hidden="true" tabindex="-1"></a>It's important to note that **there is no single "correct" way to choose</span>
+<span id="cb41-200"><a href="#cb41-200" aria-hidden="true" tabindex="-1"></a>variables**. For instance, <span class="in">`UrbanRural`</span> has a slightly higher AIC</span>
+<span id="cb41-201"><a href="#cb41-201" aria-hidden="true" tabindex="-1"></a>(253157) than <span class="in">`area.type`</span> (253043), but the difference is marginal and</span>
+<span id="cb41-202"><a href="#cb41-202" aria-hidden="true" tabindex="-1"></a>in my personal opinion, not worth incorporating into the model due to</span>
+<span id="cb41-203"><a href="#cb41-203" aria-hidden="true" tabindex="-1"></a>its additional levels. (UrbanRural has 3 levels while area.type has 5).</span>
+<span id="cb41-204"><a href="#cb41-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-205"><a href="#cb41-205" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, fig.width = 10, fig.height = 10}</span></span>
+<span id="cb41-206"><a href="#cb41-206" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> UrbanRural, <span class="at">family =</span> <span class="st">"poisson"</span>, <span class="at">data =</span> data)</span>
+<span id="cb41-207"><a href="#cb41-207" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> area.type, <span class="at">family =</span> <span class="st">"poisson"</span>, <span class="at">data =</span> data)</span>
+<span id="cb41-208"><a href="#cb41-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-209"><a href="#cb41-209" aria-hidden="true" tabindex="-1"></a><span class="co"># Create comparison data frame</span></span>
+<span id="cb41-210"><a href="#cb41-210" aria-hidden="true" tabindex="-1"></a>comparison <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb41-211"><a href="#cb41-211" aria-hidden="true" tabindex="-1"></a>  <span class="at">Model =</span> <span class="fu">c</span>(<span class="st">"UrbanRural"</span>, <span class="st">"Area Type"</span>),</span>
+<span id="cb41-212"><a href="#cb41-212" aria-hidden="true" tabindex="-1"></a>  <span class="at">AIC =</span> <span class="fu">c</span>(<span class="fu">AIC</span>(model1), <span class="fu">AIC</span>(model2)))</span>
+<span id="cb41-213"><a href="#cb41-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-214"><a href="#cb41-214" aria-hidden="true" tabindex="-1"></a><span class="co"># Pretty table</span></span>
+<span id="cb41-215"><a href="#cb41-215" aria-hidden="true" tabindex="-1"></a>comparison <span class="sc">%&gt;%</span></span>
+<span id="cb41-216"><a href="#cb41-216" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="st">"html"</span>, <span class="at">caption =</span> <span class="st">"&lt;strong&gt; Model Comparison: AIC &lt;/strong&gt;"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb41-217"><a href="#cb41-217" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>, <span class="st">"responsive"</span>), </span>
+<span id="cb41-218"><a href="#cb41-218" aria-hidden="true" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb41-219"><a href="#cb41-219" aria-hidden="true" tabindex="-1"></a>                <span class="at">position =</span> <span class="st">"center"</span>)</span>
+<span id="cb41-220"><a href="#cb41-220" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-221"><a href="#cb41-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-222"><a href="#cb41-222" aria-hidden="true" tabindex="-1"></a>Lastly, our plots indicate both variables follow similar distribution</span>
+<span id="cb41-223"><a href="#cb41-223" aria-hidden="true" tabindex="-1"></a>patterns. The effect of <span class="in">`Sea`</span>, which only has three observations, is</span>
+<span id="cb41-224"><a href="#cb41-224" aria-hidden="true" tabindex="-1"></a>negligible and including it would risk biasing our model due to its</span>
+<span id="cb41-225"><a href="#cb41-225" aria-hidden="true" tabindex="-1"></a>higher proportion of earthquakes, but smaller sample size.</span>
+<span id="cb41-226"><a href="#cb41-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-227"><a href="#cb41-227" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, fig.width = 12, fig.height = 6}</span></span>
+<span id="cb41-228"><a href="#cb41-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-229"><a href="#cb41-229" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb41-230"><a href="#cb41-230" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb41-231"><a href="#cb41-231" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb41-232"><a href="#cb41-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-233"><a href="#cb41-233" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure categorical variables are factors</span></span>
+<span id="cb41-234"><a href="#cb41-234" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb41-235"><a href="#cb41-235" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb41-236"><a href="#cb41-236" aria-hidden="true" tabindex="-1"></a>    <span class="at">UrbanRural =</span> <span class="fu">factor</span>(UrbanRural),</span>
+<span id="cb41-237"><a href="#cb41-237" aria-hidden="true" tabindex="-1"></a>    <span class="at">area.type =</span> <span class="fu">factor</span>(area.type)</span>
+<span id="cb41-238"><a href="#cb41-238" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb41-239"><a href="#cb41-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-240"><a href="#cb41-240" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Add counts directly to data frame ---</span></span>
+<span id="cb41-241"><a href="#cb41-241" aria-hidden="true" tabindex="-1"></a>data_urban <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb41-242"><a href="#cb41-242" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(UrbanRural) <span class="sc">%&gt;%</span></span>
+<span id="cb41-243"><a href="#cb41-243" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb41-244"><a href="#cb41-244" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb41-245"><a href="#cb41-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-246"><a href="#cb41-246" aria-hidden="true" tabindex="-1"></a>data_area <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb41-247"><a href="#cb41-247" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(area.type) <span class="sc">%&gt;%</span></span>
+<span id="cb41-248"><a href="#cb41-248" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb41-249"><a href="#cb41-249" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb41-250"><a href="#cb41-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-251"><a href="#cb41-251" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Plot for UrbanRural ---</span></span>
+<span id="cb41-252"><a href="#cb41-252" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_urban, <span class="fu">aes</span>(<span class="at">x =</span> UrbanRural, <span class="at">y =</span> Y)) <span class="sc">+</span></span>
+<span id="cb41-253"><a href="#cb41-253" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"lightpink"</span>) <span class="sc">+</span></span>
+<span id="cb41-254"><a href="#cb41-254" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(</span>
+<span id="cb41-255"><a href="#cb41-255" aria-hidden="true" tabindex="-1"></a>    <span class="at">fun =</span> max, <span class="at">geom =</span> <span class="st">"text"</span>,</span>
+<span id="cb41-256"><a href="#cb41-256" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"n = "</span>, n)),</span>
+<span id="cb41-257"><a href="#cb41-257" aria-hidden="true" tabindex="-1"></a>    <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">3</span></span>
+<span id="cb41-258"><a href="#cb41-258" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb41-259"><a href="#cb41-259" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb41-260"><a href="#cb41-260" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Earthquakes per Urban/Rural Area"</span>,</span>
+<span id="cb41-261"><a href="#cb41-261" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"UrbanRural"</span>,</span>
+<span id="cb41-262"><a href="#cb41-262" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Earthquakes per Year"</span></span>
+<span id="cb41-263"><a href="#cb41-263" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb41-264"><a href="#cb41-264" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb41-265"><a href="#cb41-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-266"><a href="#cb41-266" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Plot for area.type ---</span></span>
+<span id="cb41-267"><a href="#cb41-267" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(data_area, <span class="fu">aes</span>(<span class="at">x =</span> area.type, <span class="at">y =</span> Y)) <span class="sc">+</span></span>
+<span id="cb41-268"><a href="#cb41-268" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"lightblue"</span>) <span class="sc">+</span></span>
+<span id="cb41-269"><a href="#cb41-269" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(</span>
+<span id="cb41-270"><a href="#cb41-270" aria-hidden="true" tabindex="-1"></a>    <span class="at">fun =</span> max, <span class="at">geom =</span> <span class="st">"text"</span>,</span>
+<span id="cb41-271"><a href="#cb41-271" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"n = "</span>, n)),</span>
+<span id="cb41-272"><a href="#cb41-272" aria-hidden="true" tabindex="-1"></a>    <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">3</span></span>
+<span id="cb41-273"><a href="#cb41-273" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb41-274"><a href="#cb41-274" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb41-275"><a href="#cb41-275" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Earthquakes per Area Type"</span>,</span>
+<span id="cb41-276"><a href="#cb41-276" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Area Type"</span>,</span>
+<span id="cb41-277"><a href="#cb41-277" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Earthquakes per Year"</span></span>
+<span id="cb41-278"><a href="#cb41-278" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb41-279"><a href="#cb41-279" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb41-280"><a href="#cb41-280" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
+<span id="cb41-281"><a href="#cb41-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-282"><a href="#cb41-282" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Combine plots side by side ---</span></span>
+<span id="cb41-283"><a href="#cb41-283" aria-hidden="true" tabindex="-1"></a>p1</span>
+<span id="cb41-284"><a href="#cb41-284" aria-hidden="true" tabindex="-1"></a>p2</span>
+<span id="cb41-285"><a href="#cb41-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-286"><a href="#cb41-286" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-287"><a href="#cb41-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-288"><a href="#cb41-288" aria-hidden="true" tabindex="-1"></a><span class="fu"># Step 2: Fitting the model</span></span>
+<span id="cb41-289"><a href="#cb41-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-290"><a href="#cb41-290" aria-hidden="true" tabindex="-1"></a>------------------------------------------------------------------------</span>
+<span id="cb41-291"><a href="#cb41-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-292"><a href="#cb41-292" aria-hidden="true" tabindex="-1"></a>Given that the response variable, Y, represents a count of discrete</span>
+<span id="cb41-293"><a href="#cb41-293" aria-hidden="true" tabindex="-1"></a>positive numbers, we have chosen to apply a generalized linear model</span>
+<span id="cb41-294"><a href="#cb41-294" aria-hidden="true" tabindex="-1"></a>that utilities a Poisson distribution to predict Y, the frequency of</span>
+<span id="cb41-295"><a href="#cb41-295" aria-hidden="true" tabindex="-1"></a>eruptions.</span>
+<span id="cb41-296"><a href="#cb41-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-297"><a href="#cb41-297" aria-hidden="true" tabindex="-1"></a>To convert the expected average count of eruptions, denoted as µi, from</span>
+<span id="cb41-298"><a href="#cb41-298" aria-hidden="true" tabindex="-1"></a>the Poisson distribution into a linear predictor, we have used the **log</span>
+<span id="cb41-299"><a href="#cb41-299" aria-hidden="true" tabindex="-1"></a>link function**. This is because we must ensure all expected values are</span>
+<span id="cb41-300"><a href="#cb41-300" aria-hidden="true" tabindex="-1"></a>greater than 0 (our model should not output an expected negative amount</span>
+<span id="cb41-301"><a href="#cb41-301" aria-hidden="true" tabindex="-1"></a>of earthquakes!), account for non constant variance, and assume a</span>
+<span id="cb41-302"><a href="#cb41-302" aria-hidden="true" tabindex="-1"></a>discrete responses (we can't have 2.5 earthquakes either! what would</span>
+<span id="cb41-303"><a href="#cb41-303" aria-hidden="true" tabindex="-1"></a>half an earthquake mean?)</span>
+<span id="cb41-304"><a href="#cb41-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-305"><a href="#cb41-305" aria-hidden="true" tabindex="-1"></a>We have used explanatory variables; <span class="in">`previous.eruption`</span>, <span class="in">`UrbanRural`</span>,</span>
+<span id="cb41-306"><a href="#cb41-306" aria-hidden="true" tabindex="-1"></a><span class="in">`earthquakes.year`</span>, and <span class="in">`total.area`</span>. All explanatory variables had</span>
+<span id="cb41-307"><a href="#cb41-307" aria-hidden="true" tabindex="-1"></a>significant contributions towards explaining model variance (pval :</span>
+<span id="cb41-308"><a href="#cb41-308" aria-hidden="true" tabindex="-1"></a><span class="sc">\&lt;</span>2e-16).</span>
+<span id="cb41-309"><a href="#cb41-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-310"><a href="#cb41-310" aria-hidden="true" tabindex="-1"></a>We will initially fit a model with all the variables and see which is</span>
+<span id="cb41-311"><a href="#cb41-311" aria-hidden="true" tabindex="-1"></a>the optimal outcome based on which model has the lowest AIC, thereby</span>
+<span id="cb41-312"><a href="#cb41-312" aria-hidden="true" tabindex="-1"></a>penalizing model complexity and rewarding goodness of fit. In addition,</span>
+<span id="cb41-313"><a href="#cb41-313" aria-hidden="true" tabindex="-1"></a>We iteratively removed insignificant variables each model to final</span>
+<span id="cb41-314"><a href="#cb41-314" aria-hidden="true" tabindex="-1"></a>converge on glm_model4, which had the (subjectively) best combination of</span>
+<span id="cb41-315"><a href="#cb41-315" aria-hidden="true" tabindex="-1"></a>low AIC and low model complexity.</span>
+<span id="cb41-316"><a href="#cb41-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-317"><a href="#cb41-317" aria-hidden="true" tabindex="-1"></a>However, not all assumptions were not satisfied, as we can see an</span>
+<span id="cb41-318"><a href="#cb41-318" aria-hidden="true" tabindex="-1"></a>increase in variance with an increase in the Y (number of eruptions) as</span>
+<span id="cb41-319"><a href="#cb41-319" aria-hidden="true" tabindex="-1"></a>the mean increases. If our model was perfect, our predicted values would</span>
+<span id="cb41-320"><a href="#cb41-320" aria-hidden="true" tabindex="-1"></a>follow closely to the purple line.</span>
+<span id="cb41-321"><a href="#cb41-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-324"><a href="#cb41-324" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-325"><a href="#cb41-325" aria-hidden="true" tabindex="-1"></a><span class="do">############################################################</span></span>
+<span id="cb41-326"><a href="#cb41-326" aria-hidden="true" tabindex="-1"></a><span class="co"># Split data into test and training</span></span>
+<span id="cb41-327"><a href="#cb41-327" aria-hidden="true" tabindex="-1"></a><span class="do">############################################################</span></span>
+<span id="cb41-328"><a href="#cb41-328" aria-hidden="true" tabindex="-1"></a>train_index <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(data<span class="sc">$</span>Y, <span class="at">p =</span> <span class="fl">0.8</span>, <span class="at">list =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb41-329"><a href="#cb41-329" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span> data[train_index, ]</span>
+<span id="cb41-330"><a href="#cb41-330" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span> data[<span class="sc">-</span>train_index, ]</span>
+<span id="cb41-331"><a href="#cb41-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-332"><a href="#cb41-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-333"><a href="#cb41-333" aria-hidden="true" tabindex="-1"></a><span class="co">#Fit model with all predictor variables and see what the model tries best with stepwise regression </span></span>
+<span id="cb41-334"><a href="#cb41-334" aria-hidden="true" tabindex="-1"></a>glm_model1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> previous.eruption <span class="sc">+</span> UrbanRural <span class="sc">+</span> shape.length <span class="sc">+</span> total.area <span class="sc">+</span> total.land.area <span class="sc">+</span> earthquakes.year, <span class="at">family =</span> <span class="st">"poisson"</span>, <span class="at">data =</span> train_data)</span>
+<span id="cb41-335"><a href="#cb41-335" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(glm_model1)</span></span>
+<span id="cb41-336"><a href="#cb41-336" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-337"><a href="#cb41-337" aria-hidden="true" tabindex="-1"></a>glm_model2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> previous.eruption <span class="sc">+</span> earthquakes.year <span class="sc">+</span> UrbanRural <span class="sc">+</span> total.area <span class="sc">+</span> shape.length, <span class="at">data =</span> train_data, <span class="at">family =</span> poisson)</span>
+<span id="cb41-338"><a href="#cb41-338" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(glm_model2)</span></span>
+<span id="cb41-339"><a href="#cb41-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-340"><a href="#cb41-340" aria-hidden="true" tabindex="-1"></a>glm_model3 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> UrbanRural <span class="sc">+</span> previous.eruption <span class="sc">+</span> earthquakes.year, <span class="at">data =</span> train_data, <span class="at">family =</span> poisson)</span>
+<span id="cb41-341"><a href="#cb41-341" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(glm_model3)</span></span>
+<span id="cb41-342"><a href="#cb41-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-343"><a href="#cb41-343" aria-hidden="true" tabindex="-1"></a><span class="co"># Best model </span></span>
+<span id="cb41-344"><a href="#cb41-344" aria-hidden="true" tabindex="-1"></a>glm_model4 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> previous.eruption <span class="sc">+</span> earthquakes.year <span class="sc">+</span> UrbanRural <span class="sc">+</span> total.area, <span class="at">family =</span> poisson, <span class="at">data =</span> train_data)</span>
+<span id="cb41-345"><a href="#cb41-345" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(glm_model4)</span></span>
+<span id="cb41-346"><a href="#cb41-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-347"><a href="#cb41-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-348"><a href="#cb41-348" aria-hidden="true" tabindex="-1"></a><span class="co"># MODEL COMPARISON </span></span>
+<span id="cb41-349"><a href="#cb41-349" aria-hidden="true" tabindex="-1"></a><span class="co">#glm_model3 has the best median between low AIC and low model complexity </span></span>
+<span id="cb41-350"><a href="#cb41-350" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(glm_model1, glm_model2, glm_model3, glm_model4)</span>
+<span id="cb41-351"><a href="#cb41-351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-352"><a href="#cb41-352" aria-hidden="true" tabindex="-1"></a>predictions_glm4 <span class="ot">&lt;-</span> <span class="fu">predict</span>(glm_model4, <span class="at">newdata =</span> test_data, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb41-353"><a href="#cb41-353" aria-hidden="true" tabindex="-1"></a>test_data<span class="sc">$</span>predictions_glm4 <span class="ot">&lt;-</span> predictions_glm4</span>
+<span id="cb41-354"><a href="#cb41-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-355"><a href="#cb41-355" aria-hidden="true" tabindex="-1"></a><span class="co"># kind of bad model </span></span>
+<span id="cb41-356"><a href="#cb41-356" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(test_data, <span class="fu">aes</span>(<span class="at">x =</span> Y, <span class="at">y =</span> predictions_glm4, <span class="at">col =</span> UrbanRural)) <span class="sc">+</span></span>
+<span id="cb41-357"><a href="#cb41-357" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb41-358"><a href="#cb41-358" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb41-359"><a href="#cb41-359" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> Y, <span class="at">y =</span> Y), <span class="at">color =</span> <span class="st">"purple"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> <span class="co"># Ideal fit line</span></span>
+<span id="cb41-360"><a href="#cb41-360" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Actual"</span>, <span class="at">y =</span> <span class="st">"Predicted"</span>, <span class="at">title =</span> <span class="st">"Actual vs. Predicted values from chosen Poisson model "</span>) <span class="sc">+</span> </span>
+<span id="cb41-361"><a href="#cb41-361" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb41-362"><a href="#cb41-362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-363"><a href="#cb41-363" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb41-364"><a href="#cb41-364" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit model with full data now </span></span>
+<span id="cb41-365"><a href="#cb41-365" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb41-366"><a href="#cb41-366" aria-hidden="true" tabindex="-1"></a>glm_model3_full <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> UrbanRural <span class="sc">+</span> previous.eruption <span class="sc">+</span> earthquakes.year <span class="sc">+</span> total.area,</span>
+<span id="cb41-367"><a href="#cb41-367" aria-hidden="true" tabindex="-1"></a>                 <span class="at">family =</span> <span class="st">"poisson"</span>, <span class="at">data =</span> data)</span>
+<span id="cb41-368"><a href="#cb41-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-369"><a href="#cb41-369" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(glm_model3_full)</span></span>
+<span id="cb41-370"><a href="#cb41-370" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-371"><a href="#cb41-371" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-372"><a href="#cb41-372" aria-hidden="true" tabindex="-1"></a><span class="fu"># Step 3: Diagnostic checks on our chosen model</span></span>
+<span id="cb41-373"><a href="#cb41-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-374"><a href="#cb41-374" aria-hidden="true" tabindex="-1"></a>------------------------------------------------------------------------</span>
+<span id="cb41-375"><a href="#cb41-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-376"><a href="#cb41-376" aria-hidden="true" tabindex="-1"></a>Below, we run diagnostic checks on our chosen model</span>
+<span id="cb41-377"><a href="#cb41-377" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-378"><a href="#cb41-378" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>The **Chi-squared ANOVA** checks if all levels are significant</span>
+<span id="cb41-379"><a href="#cb41-379" aria-hidden="true" tabindex="-1"></a>    within our model. For example, the <span class="in">`UrbanRural`</span> variable has 3</span>
+<span id="cb41-380"><a href="#cb41-380" aria-hidden="true" tabindex="-1"></a>    levels (*degrees of freedom +1*) , and we can see from the</span>
+<span id="cb41-381"><a href="#cb41-381" aria-hidden="true" tabindex="-1"></a>    significant P-value of <span class="sc">\&lt;</span>2.2e-16 that they are all significant.</span>
+<span id="cb41-382"><a href="#cb41-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-383"><a href="#cb41-383" aria-hidden="true" tabindex="-1"></a>    <span class="in">```{r}</span></span>
+<span id="cb41-384"><a href="#cb41-384" aria-hidden="true" tabindex="-1"></a>    <span class="co"># All levels are significant for our best model</span></span>
+<span id="cb41-385"><a href="#cb41-385" aria-hidden="true" tabindex="-1"></a>    <span class="fu">anova</span>(glm_model4, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span>
+<span id="cb41-386"><a href="#cb41-386" aria-hidden="true" tabindex="-1"></a>    <span class="in">```</span></span>
+<span id="cb41-387"><a href="#cb41-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-388"><a href="#cb41-388" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>**Cooks distance** measures the influence of a specific data point</span>
+<span id="cb41-389"><a href="#cb41-389" aria-hidden="true" tabindex="-1"></a>    on the overall model. For example, it quantifies how much the models</span>
+<span id="cb41-390"><a href="#cb41-390" aria-hidden="true" tabindex="-1"></a>    predictions would change if these datapoints were removed. Below, we</span>
+<span id="cb41-391"><a href="#cb41-391" aria-hidden="true" tabindex="-1"></a>    can see there are a few datapoints that clearly stick out, but all</span>
+<span id="cb41-392"><a href="#cb41-392" aria-hidden="true" tabindex="-1"></a>    have a distance under 0.5 so we are not concerned about their</span>
+<span id="cb41-393"><a href="#cb41-393" aria-hidden="true" tabindex="-1"></a>    influence.</span>
+<span id="cb41-394"><a href="#cb41-394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-395"><a href="#cb41-395" aria-hidden="true" tabindex="-1"></a>    <span class="in">```{r}</span></span>
+<span id="cb41-396"><a href="#cb41-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-397"><a href="#cb41-397" aria-hidden="true" tabindex="-1"></a>    <span class="co"># A simple function to generate a cooks distance plot </span></span>
+<span id="cb41-398"><a href="#cb41-398" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cooks20x</span>(glm_model3)</span>
+<span id="cb41-399"><a href="#cb41-399" aria-hidden="true" tabindex="-1"></a>    <span class="in">```</span></span>
+<span id="cb41-400"><a href="#cb41-400" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-401"><a href="#cb41-401" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>We use a **normality check** to see how the residuals of our model</span>
+<span id="cb41-402"><a href="#cb41-402" aria-hidden="true" tabindex="-1"></a>    are distributed. Residuals are the differences between the observed</span>
+<span id="cb41-403"><a href="#cb41-403" aria-hidden="true" tabindex="-1"></a>    values and the values predicted by out model, simply put as</span>
+<span id="cb41-404"><a href="#cb41-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-405"><a href="#cb41-405" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb41-406"><a href="#cb41-406" aria-hidden="true" tabindex="-1"></a>r_i = y_i - \hat{y}_i$.</span>
+<span id="cb41-407"><a href="#cb41-407" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb41-408"><a href="#cb41-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-411"><a href="#cb41-411" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-412"><a href="#cb41-412" aria-hidden="true" tabindex="-1"></a><span class="fu">normcheck</span>(glm_model3)</span>
+<span id="cb41-413"><a href="#cb41-413" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-414"><a href="#cb41-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-415"><a href="#cb41-415" aria-hidden="true" tabindex="-1"></a><span class="fu"># Step 4: Quantifying the impact of our variables on the frequency of earthquakes</span></span>
+<span id="cb41-416"><a href="#cb41-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-417"><a href="#cb41-417" aria-hidden="true" tabindex="-1"></a>------------------------------------------------------------------------</span>
+<span id="cb41-418"><a href="#cb41-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-419"><a href="#cb41-419" aria-hidden="true" tabindex="-1"></a>Diving a bit into understanding the foundations of how we will use this</span>
+<span id="cb41-420"><a href="#cb41-420" aria-hidden="true" tabindex="-1"></a>statistical model in R... It is worth noting that we need to use a link</span>
+<span id="cb41-421"><a href="#cb41-421" aria-hidden="true" tabindex="-1"></a>function to map our parameter of interest, $\mu_i$ , to the real number</span>
+<span id="cb41-422"><a href="#cb41-422" aria-hidden="true" tabindex="-1"></a>line, where $log(\mu_i) = \beta_0 + \beta_1 x_i$.</span>
+<span id="cb41-423"><a href="#cb41-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-424"><a href="#cb41-424" aria-hidden="true" tabindex="-1"></a>In other words, the expected value of our response variable, $\mu_i$,</span>
+<span id="cb41-425"><a href="#cb41-425" aria-hidden="true" tabindex="-1"></a>must be non negative $(\mu_i\ ≥ 0)$. However, because we are using a</span>
+<span id="cb41-426"><a href="#cb41-426" aria-hidden="true" tabindex="-1"></a>log-link function, the model actually estimates $\log(\mu_i)$ which can</span>
+<span id="cb41-427"><a href="#cb41-427" aria-hidden="true" tabindex="-1"></a>take on any real number, that is \$- <span class="sc">\\</span>infty <span class="sc">\&lt;</span> <span class="sc">\\</span>log(<span class="sc">\\</span>mu_i) <span class="sc">\&lt;</span></span>
+<span id="cb41-428"><a href="#cb41-428" aria-hidden="true" tabindex="-1"></a>+<span class="sc">\\</span>infty\$</span>
+<span id="cb41-429"><a href="#cb41-429" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-430"><a href="#cb41-430" aria-hidden="true" tabindex="-1"></a>[Thus, when it comes to interpreting, we can conclude the</span>
+<span id="cb41-431"><a href="#cb41-431" aria-hidden="true" tabindex="-1"></a>below:]{.underline}</span>
+<span id="cb41-432"><a href="#cb41-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-433"><a href="#cb41-433" aria-hidden="true" tabindex="-1"></a>We have evidence to reject the null hypothesis that the model is a good</span>
+<span id="cb41-434"><a href="#cb41-434" aria-hidden="true" tabindex="-1"></a>fit (pval : 0) .</span>
+<span id="cb41-435"><a href="#cb41-435" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-436"><a href="#cb41-436" aria-hidden="true" tabindex="-1"></a>All variables were significant in explaining the variance in our</span>
+<span id="cb41-437"><a href="#cb41-437" aria-hidden="true" tabindex="-1"></a>response (p-val <span class="sc">\&lt;</span> 0.05).</span>
+<span id="cb41-438"><a href="#cb41-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-439"><a href="#cb41-439" aria-hidden="true" tabindex="-1"></a>However, we can visually see that this model still offers some useful</span>
+<span id="cb41-440"><a href="#cb41-440" aria-hidden="true" tabindex="-1"></a>information from the above plot.</span>
+<span id="cb41-441"><a href="#cb41-441" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-442"><a href="#cb41-442" aria-hidden="true" tabindex="-1"></a>Holding all other variables constant:</span>
+<span id="cb41-443"><a href="#cb41-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-444"><a href="#cb41-444" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>We estimate that, for every 1 square km increase in total area, the</span>
+<span id="cb41-445"><a href="#cb41-445" aria-hidden="true" tabindex="-1"></a>    expected number of eruptions for a given time period increases by</span>
+<span id="cb41-446"><a href="#cb41-446" aria-hidden="true" tabindex="-1"></a>    1.86%</span>
+<span id="cb41-447"><a href="#cb41-447" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-448"><a href="#cb41-448" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>We estimate that, for every 1 unit increase in previous eruptions,</span>
+<span id="cb41-449"><a href="#cb41-449" aria-hidden="true" tabindex="-1"></a>    the expected number of eruptions for a given time period decrease by</span>
+<span id="cb41-450"><a href="#cb41-450" aria-hidden="true" tabindex="-1"></a>    76.61%</span>
+<span id="cb41-451"><a href="#cb41-451" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-452"><a href="#cb41-452" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>We estimate that, for every 1 unit increase in earthquakes.year</span>
+<span id="cb41-453"><a href="#cb41-453" aria-hidden="true" tabindex="-1"></a>    (average number of earthquakes per year in the area), the expected</span>
+<span id="cb41-454"><a href="#cb41-454" aria-hidden="true" tabindex="-1"></a>    number of eruptions for a given time period increase by 4.13%.</span>
+<span id="cb41-455"><a href="#cb41-455" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-456"><a href="#cb41-456" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>We estimate that the expected number of earthquakes in a given time</span>
+<span id="cb41-457"><a href="#cb41-457" aria-hidden="true" tabindex="-1"></a>    period for the "Settlement" Urban Rural category is 26.3% higher</span>
+<span id="cb41-458"><a href="#cb41-458" aria-hidden="true" tabindex="-1"></a>    than the expected number of earthquakes in the "Other" category.</span>
+<span id="cb41-459"><a href="#cb41-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-460"><a href="#cb41-460" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>We estimate that the expected number of earthquakes in a given time</span>
+<span id="cb41-461"><a href="#cb41-461" aria-hidden="true" tabindex="-1"></a>    period for the "Urban" Urban Rural category is 44.84% lower than the</span>
+<span id="cb41-462"><a href="#cb41-462" aria-hidden="true" tabindex="-1"></a>    expected number of earthquakes in the "Other" category.</span>
+<span id="cb41-463"><a href="#cb41-463" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-466"><a href="#cb41-466" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-467"><a href="#cb41-467" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_model3_full) </span>
+<span id="cb41-468"><a href="#cb41-468" aria-hidden="true" tabindex="-1"></a><span class="dv">100</span><span class="sc">*</span>(<span class="fu">exp</span>(<span class="fu">coef</span>(glm_model3_full))<span class="sc">-</span><span class="dv">1</span>)  </span>
+<span id="cb41-469"><a href="#cb41-469" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-470"><a href="#cb41-470" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-471"><a href="#cb41-471" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-472"><a href="#cb41-472" aria-hidden="true" tabindex="-1"></a><span class="fu"># Step 5: Adding more complexity to our model to improve its explanatory power</span></span>
+<span id="cb41-473"><a href="#cb41-473" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-474"><a href="#cb41-474" aria-hidden="true" tabindex="-1"></a>------------------------------------------------------------------------</span>
+<span id="cb41-475"><a href="#cb41-475" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-476"><a href="#cb41-476" aria-hidden="true" tabindex="-1"></a>Great! Now that we have established our baseline model, it's time to see</span>
+<span id="cb41-477"><a href="#cb41-477" aria-hidden="true" tabindex="-1"></a>how we can improve it one way to do this is by adding interaction</span>
+<span id="cb41-478"><a href="#cb41-478" aria-hidden="true" tabindex="-1"></a>effects. Interaction effects take into account the effect of one</span>
+<span id="cb41-479"><a href="#cb41-479" aria-hidden="true" tabindex="-1"></a>explanatory variable on the response variable, depending on the level of</span>
+<span id="cb41-480"><a href="#cb41-480" aria-hidden="true" tabindex="-1"></a>another explanatory variable. For example, our <span class="in">`UrbanRural`</span> variable has</span>
+<span id="cb41-481"><a href="#cb41-481" aria-hidden="true" tabindex="-1"></a>3 levels, and the effect of each level on the response may differ based</span>
+<span id="cb41-482"><a href="#cb41-482" aria-hidden="true" tabindex="-1"></a>on the other explanatory variables.</span>
+<span id="cb41-483"><a href="#cb41-483" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-484"><a href="#cb41-484" aria-hidden="true" tabindex="-1"></a>Below, we explore one interaction effect, and notice a distinction</span>
+<span id="cb41-485"><a href="#cb41-485" aria-hidden="true" tabindex="-1"></a>between previous.eruption and earthquakes.year. The interaction was fit</span>
+<span id="cb41-486"><a href="#cb41-486" aria-hidden="true" tabindex="-1"></a>and kept due it's significant p-value (pval : <span class="sc">\&lt;</span> 2.2e-16).</span>
+<span id="cb41-487"><a href="#cb41-487" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-490"><a href="#cb41-490" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-491"><a href="#cb41-491" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb41-492"><a href="#cb41-492" aria-hidden="true" tabindex="-1"></a><span class="co"># Lets investigate the relationships</span></span>
+<span id="cb41-493"><a href="#cb41-493" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb41-494"><a href="#cb41-494" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> previous.eruption<span class="sc">*</span>earthquakes.year, <span class="at">data =</span> data, <span class="at">family =</span> poisson)</span>
+<span id="cb41-495"><a href="#cb41-495" aria-hidden="true" tabindex="-1"></a><span class="fu">interact_plot</span>(fit1, <span class="at">pred =</span> previous.eruption, <span class="at">modx =</span> earthquakes.year)</span>
+<span id="cb41-496"><a href="#cb41-496" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-497"><a href="#cb41-497" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-498"><a href="#cb41-498" aria-hidden="true" tabindex="-1"></a>After comparing our previous simple poisson model, with our current</span>
+<span id="cb41-499"><a href="#cb41-499" aria-hidden="true" tabindex="-1"></a>poisson model with an interaction effect, we can see the interaction</span>
+<span id="cb41-500"><a href="#cb41-500" aria-hidden="true" tabindex="-1"></a>model actually provides a lower AIC!</span>
+<span id="cb41-501"><a href="#cb41-501" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-504"><a href="#cb41-504" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-505"><a href="#cb41-505" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb41-506"><a href="#cb41-506" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit model with full data now </span></span>
+<span id="cb41-507"><a href="#cb41-507" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb41-508"><a href="#cb41-508" aria-hidden="true" tabindex="-1"></a>glm_model5 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y <span class="sc">~</span> previous.eruption<span class="sc">*</span>earthquakes.year <span class="sc">+</span> UrbanRural <span class="sc">+</span> total.area, <span class="at">family =</span> poisson, <span class="at">data =</span> data)</span>
+<span id="cb41-509"><a href="#cb41-509" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_model5) <span class="co"># All significant </span></span>
+<span id="cb41-510"><a href="#cb41-510" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-511"><a href="#cb41-511" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(glm_model4, glm_model5)</span>
+<span id="cb41-512"><a href="#cb41-512" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-513"><a href="#cb41-513" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-514"><a href="#cb41-514" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-515"><a href="#cb41-515" aria-hidden="true" tabindex="-1"></a>We can also see the predictions from this model perform slightly better</span>
+<span id="cb41-516"><a href="#cb41-516" aria-hidden="true" tabindex="-1"></a>than our previous model.</span>
+<span id="cb41-517"><a href="#cb41-517" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-520"><a href="#cb41-520" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-521"><a href="#cb41-521" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb41-522"><a href="#cb41-522" aria-hidden="true" tabindex="-1"></a><span class="co"># SHOW PREDICTIONS</span></span>
+<span id="cb41-523"><a href="#cb41-523" aria-hidden="true" tabindex="-1"></a><span class="do">##############################</span></span>
+<span id="cb41-524"><a href="#cb41-524" aria-hidden="true" tabindex="-1"></a>predictions_glm5 <span class="ot">&lt;-</span> <span class="fu">predict</span>(glm_model5, <span class="at">newdata =</span> test_data, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb41-525"><a href="#cb41-525" aria-hidden="true" tabindex="-1"></a>test_data<span class="sc">$</span>predictions_glm5 <span class="ot">&lt;-</span> predictions_glm5</span>
+<span id="cb41-526"><a href="#cb41-526" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-527"><a href="#cb41-527" aria-hidden="true" tabindex="-1"></a><span class="co"># kind of bad model </span></span>
+<span id="cb41-528"><a href="#cb41-528" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(test_data, <span class="fu">aes</span>(<span class="at">x =</span> Y, <span class="at">y =</span> predictions_glm5, <span class="at">col =</span> UrbanRural)) <span class="sc">+</span></span>
+<span id="cb41-529"><a href="#cb41-529" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb41-530"><a href="#cb41-530" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb41-531"><a href="#cb41-531" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> Y, <span class="at">y =</span> Y), <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> <span class="co"># Ideal fit line</span></span>
+<span id="cb41-532"><a href="#cb41-532" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Actual"</span>, <span class="at">y =</span> <span class="st">"Predicted"</span>, <span class="at">title =</span> <span class="st">"Actual vs. Predicted Poisson model "</span>) <span class="sc">+</span> </span>
+<span id="cb41-533"><a href="#cb41-533" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb41-534"><a href="#cb41-534" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-535"><a href="#cb41-535" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-536"><a href="#cb41-536" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-537"><a href="#cb41-537" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-538"><a href="#cb41-538" aria-hidden="true" tabindex="-1"></a>Similar to step Step 2, we must run diagnostic checks on our model.</span>
+<span id="cb41-539"><a href="#cb41-539" aria-hidden="true" tabindex="-1"></a>After all, we can't blindly code something and believe it to be</span>
+<span id="cb41-540"><a href="#cb41-540" aria-hidden="true" tabindex="-1"></a>accurate!</span>
+<span id="cb41-541"><a href="#cb41-541" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-542"><a href="#cb41-542" aria-hidden="true" tabindex="-1"></a>We can see our interaction is significant with a p-value of <span class="sc">\&lt;</span>2.2e-17</span>
+<span id="cb41-543"><a href="#cb41-543" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-544"><a href="#cb41-544" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, echo = TRUE}</span></span>
+<span id="cb41-545"><a href="#cb41-545" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(glm_model5, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span>
+<span id="cb41-546"><a href="#cb41-546" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-547"><a href="#cb41-547" aria-hidden="true" tabindex="-1"></a><span class="co"># ##############################</span></span>
+<span id="cb41-548"><a href="#cb41-548" aria-hidden="true" tabindex="-1"></a><span class="co"># # Diagnostic checks</span></span>
+<span id="cb41-549"><a href="#cb41-549" aria-hidden="true" tabindex="-1"></a><span class="co"># ##############################</span></span>
+<span id="cb41-550"><a href="#cb41-550" aria-hidden="true" tabindex="-1"></a><span class="co"># cooks20x(glm_model5)</span></span>
+<span id="cb41-551"><a href="#cb41-551" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(glm_model5, lty = 2, pch = substr(data$UrbanRural, 1, 1))</span></span>
+<span id="cb41-552"><a href="#cb41-552" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-553"><a href="#cb41-553" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-554"><a href="#cb41-554" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-555"><a href="#cb41-555" aria-hidden="true" tabindex="-1"></a><span class="fu"># Step 6: Concluding statements and interpretations from our final model</span></span>
+<span id="cb41-556"><a href="#cb41-556" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-557"><a href="#cb41-557" aria-hidden="true" tabindex="-1"></a>------------------------------------------------------------------------</span>
+<span id="cb41-558"><a href="#cb41-558" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-559"><a href="#cb41-559" aria-hidden="true" tabindex="-1"></a>As the response variable, number of eruptions during the observation</span>
+<span id="cb41-560"><a href="#cb41-560" aria-hidden="true" tabindex="-1"></a>period, is a count, we have fit a generalized linear model with a</span>
+<span id="cb41-561"><a href="#cb41-561" aria-hidden="true" tabindex="-1"></a>Poisson response distribution.</span>
+<span id="cb41-562"><a href="#cb41-562" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-563"><a href="#cb41-563" aria-hidden="true" tabindex="-1"></a>We have 5 significant explanatory terms (pval all <span class="sc">\&lt;</span>0.05);</span>
+<span id="cb41-564"><a href="#cb41-564" aria-hidden="true" tabindex="-1"></a>earthquakes.year, total.area, previous.eruption, total.area, and</span>
+<span id="cb41-565"><a href="#cb41-565" aria-hidden="true" tabindex="-1"></a>UrbanRural. The interaction plot above suggests a difference between the</span>
+<span id="cb41-566"><a href="#cb41-566" aria-hidden="true" tabindex="-1"></a>expected number of eruptions depending on how many eruptions there were</span>
+<span id="cb41-567"><a href="#cb41-567" aria-hidden="true" tabindex="-1"></a>in the previous year (per area) and the average number of eruptions (per</span>
+<span id="cb41-568"><a href="#cb41-568" aria-hidden="true" tabindex="-1"></a>area).</span>
+<span id="cb41-569"><a href="#cb41-569" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-570"><a href="#cb41-570" aria-hidden="true" tabindex="-1"></a>Hence, a poisson model with an interaction term between</span>
+<span id="cb41-571"><a href="#cb41-571" aria-hidden="true" tabindex="-1"></a>previous.eruption and earthquakes.year was fit. The interaction term was</span>
+<span id="cb41-572"><a href="#cb41-572" aria-hidden="true" tabindex="-1"></a>significant (pval : <span class="sc">\&lt;</span> 2e-16) so it remained in the model.</span>
+<span id="cb41-573"><a href="#cb41-573" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-574"><a href="#cb41-574" aria-hidden="true" tabindex="-1"></a>All assumptions were satisfied. However, we still cannot trust the</span>
+<span id="cb41-575"><a href="#cb41-575" aria-hidden="true" tabindex="-1"></a>results from the Poisson model (pval: 0 )</span>
+<span id="cb41-576"><a href="#cb41-576" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-577"><a href="#cb41-577" aria-hidden="true" tabindex="-1"></a>Holding all other variables constant...</span>
+<span id="cb41-578"><a href="#cb41-578" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-579"><a href="#cb41-579" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>We estimate that, for every 1 unit increase in the number of</span>
+<span id="cb41-580"><a href="#cb41-580" aria-hidden="true" tabindex="-1"></a>    previous volcanic eruptions (previous.eruptions), the expected</span>
+<span id="cb41-581"><a href="#cb41-581" aria-hidden="true" tabindex="-1"></a>    number eruptions in a given time period decreases by 63.3%.</span>
+<span id="cb41-582"><a href="#cb41-582" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-583"><a href="#cb41-583" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>This is further decreased by 45.1% for every increase in the</span>
+<span id="cb41-584"><a href="#cb41-584" aria-hidden="true" tabindex="-1"></a>        average number of earthquakes per year in the area</span>
+<span id="cb41-585"><a href="#cb41-585" aria-hidden="true" tabindex="-1"></a>        (earthquakes.year)</span>
+<span id="cb41-586"><a href="#cb41-586" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-587"><a href="#cb41-587" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>We estimate that, for every 1 unit increase in the number of average</span>
+<span id="cb41-588"><a href="#cb41-588" aria-hidden="true" tabindex="-1"></a>    earthquakes per year, the expected number of eruptions in a given</span>
+<span id="cb41-589"><a href="#cb41-589" aria-hidden="true" tabindex="-1"></a>    time period increases by 9.83%.</span>
+<span id="cb41-590"><a href="#cb41-590" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-591"><a href="#cb41-591" aria-hidden="true" tabindex="-1"></a><span class="ss">    -   </span>There is further decreased by 45.1% for every increase the</span>
+<span id="cb41-592"><a href="#cb41-592" aria-hidden="true" tabindex="-1"></a>        number of previous volcanic eruptions (previous.eruption).</span>
+<span id="cb41-593"><a href="#cb41-593" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-594"><a href="#cb41-594" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>We estimate that, for every 1 square km increase in total area, the</span>
+<span id="cb41-595"><a href="#cb41-595" aria-hidden="true" tabindex="-1"></a>    expected number of eruptions in a given time period increases by</span>
+<span id="cb41-596"><a href="#cb41-596" aria-hidden="true" tabindex="-1"></a>    1.83%</span>
+<span id="cb41-597"><a href="#cb41-597" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-598"><a href="#cb41-598" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>We estimate that the expected number of eruptions in a given time</span>
+<span id="cb41-599"><a href="#cb41-599" aria-hidden="true" tabindex="-1"></a>    period is 44.97% lower in "Urban" (UrbanRural) areas compared to</span>
+<span id="cb41-600"><a href="#cb41-600" aria-hidden="true" tabindex="-1"></a>    "Other" areas</span>
+<span id="cb41-601"><a href="#cb41-601" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-602"><a href="#cb41-602" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>We estimate that the expected number of eruptions in a given period</span>
+<span id="cb41-603"><a href="#cb41-603" aria-hidden="true" tabindex="-1"></a>    is 26.27% higher in "Settlement" (UrbanRural) areas compared to</span>
+<span id="cb41-604"><a href="#cb41-604" aria-hidden="true" tabindex="-1"></a>    "Other areas"</span>
+<span id="cb41-605"><a href="#cb41-605" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-608"><a href="#cb41-608" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-609"><a href="#cb41-609" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(glm_model5)</span>
+<span id="cb41-610"><a href="#cb41-610" aria-hidden="true" tabindex="-1"></a><span class="co"># pval_glm_model5 &lt;- 1 - pchisq(90402, 14987)</span></span>
+<span id="cb41-611"><a href="#cb41-611" aria-hidden="true" tabindex="-1"></a><span class="co"># print(paste("We cannot still trust the most optimal model found as it has a small p-value of", pval_glm_model5, "indicating the poisson model does not provide a good fit "))</span></span>
+<span id="cb41-612"><a href="#cb41-612" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-613"><a href="#cb41-613" aria-hidden="true" tabindex="-1"></a><span class="co">#Interpreting coefficients</span></span>
+<span id="cb41-614"><a href="#cb41-614" aria-hidden="true" tabindex="-1"></a><span class="dv">100</span><span class="sc">*</span>(<span class="fu">exp</span>(<span class="fu">coef</span>(glm_model5))<span class="sc">-</span><span class="dv">1</span>)  </span>
+<span id="cb41-615"><a href="#cb41-615" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-616"><a href="#cb41-616" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb41-617"><a href="#cb41-617" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-618"><a href="#cb41-618" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-619"><a href="#cb41-619" aria-hidden="true" tabindex="-1"></a><span class="fu"># Extra : Mathematical interpretation of our model</span></span>
+<span id="cb41-620"><a href="#cb41-620" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-621"><a href="#cb41-621" aria-hidden="true" tabindex="-1"></a>------------------------------------------------------------------------</span>
+<span id="cb41-622"><a href="#cb41-622" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-623"><a href="#cb41-623" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Our final model is:</span><span class="co">]</span>{.underline}</span>
+<span id="cb41-624"><a href="#cb41-624" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-625"><a href="#cb41-625" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb41-626"><a href="#cb41-626" aria-hidden="true" tabindex="-1"></a>log(\mu_i)=\beta_0+\beta_1p_i+\beta_2e_i+\beta_3s_i+\beta_4u_i+\beta_5t_i+\beta_6p_ie_i</span>
+<span id="cb41-627"><a href="#cb41-627" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb41-628"><a href="#cb41-628" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-629"><a href="#cb41-629" aria-hidden="true" tabindex="-1"></a>Where :</span>
+<span id="cb41-630"><a href="#cb41-630" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-631"><a href="#cb41-631" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>$\mu_i$ is the number of eruptions during the observation period and</span>
+<span id="cb41-632"><a href="#cb41-632" aria-hidden="true" tabindex="-1"></a>    Y (the expected number of eruptions in the "Other" Urban Area) has a</span>
+<span id="cb41-633"><a href="#cb41-633" aria-hidden="true" tabindex="-1"></a>    poisson distribution with mean $\mu_i$</span>
+<span id="cb41-634"><a href="#cb41-634" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-635"><a href="#cb41-635" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>$\text{p}_{i}$ represents the number of previous eruptions in the</span>
+<span id="cb41-636"><a href="#cb41-636" aria-hidden="true" tabindex="-1"></a>    area</span>
+<span id="cb41-637"><a href="#cb41-637" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-638"><a href="#cb41-638" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>$\text{e}_{i}$ represents the average number of earthquakes per year</span>
+<span id="cb41-639"><a href="#cb41-639" aria-hidden="true" tabindex="-1"></a>    in the area</span>
+<span id="cb41-640"><a href="#cb41-640" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-641"><a href="#cb41-641" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The factor variable $\text{UrbanRural}$ has 3 dummy variables where</span>
+<span id="cb41-642"><a href="#cb41-642" aria-hidden="true" tabindex="-1"></a>    $\text{s}_{i}$ takes the value 1 if the observation is from</span>
+<span id="cb41-643"><a href="#cb41-643" aria-hidden="true" tabindex="-1"></a>    Settlement and 0 otherwise. In addition $\text{u}_{i}$ takes the</span>
+<span id="cb41-644"><a href="#cb41-644" aria-hidden="true" tabindex="-1"></a>    value 1 if the observation is from Urban, and 0 otherwise.</span>
+<span id="cb41-645"><a href="#cb41-645" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-646"><a href="#cb41-646" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>$\text{t}_{i}$ represents the total area (including water) in square</span>
+<span id="cb41-647"><a href="#cb41-647" aria-hidden="true" tabindex="-1"></a>    km.</span>
+<span id="cb41-648"><a href="#cb41-648" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-649"><a href="#cb41-649" aria-hidden="true" tabindex="-1"></a>Here, "Other" (within the <span class="in">`UrbanRural`</span> factor) is our baseline level.</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>

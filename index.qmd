@@ -21,12 +21,15 @@ editor_options:
 
 My name's Bri. I enjoy statistical modelling and making predictions.
 
-```{r, warning = FALSE, echo = FALSE}
+```{r setup, include = FALSE, warning = FALSE, echo = FALSE}
 library(tidyverse)
 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 # Install and load required packages
 
+```
+
+```{r}
 # Create a data frame for the smiley face
 smiley_data <- data.frame(
   x = c(-0.2, 0.2, -0.1, 0.1, -0.1, 0.1),  # X-coordinates
