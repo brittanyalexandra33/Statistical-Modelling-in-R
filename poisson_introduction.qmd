@@ -329,7 +329,7 @@ ggplot(df, aes(x, y)) +
 
     $\ell = \log(L) = \sum_{i=1}^{n} \log \left[ f(y_i; \boldsymbol{\beta}) \right], \ where \ f(y_i; \boldsymbol{\beta}) \ is \ the \ pmf \ of \ the \ assumed \ response \ distribution$
 
-# V. Deviance as a Goodness of Fit
+# V.I Deviance as a Goodness of Fit
 
 ------------------------------------------------------------------------
 
@@ -350,8 +350,8 @@ ggplot(df, aes(x, y)) +
 
 Statistical analysis does not simply end once we have fit a model. We
 must determine whether or not our model seems appropriate.
-"Goodness-of-fit" is a property that describes how well the data appears
-to fit the model's assumptions. For a GLM, these assumptions are
+"Goodness-of-fit" (GOF) is a property that describes how well the data
+appears to fit the model's assumptions. For a GLM, these assumptions are
 
 1.  The observations are independent.
 
@@ -378,39 +378,40 @@ terms;
 
 But, adding explanatory terms is sometimes said to make it more
 "complex", or increase its "complexity." In consequence, increasing a
-models complexity will almost always
+models complexity will almost always increase it's GOF by...
 
--   Decrease the residual sum of squares (linear regression), OR
+-   Decreasing the residual sum of squares (linear regression), OR
 
 -   Increase the maximised log-likelihood (GLMS).
 
-**Model Saturation**
+Thisis because a model with many parameters may enable our predictions
+to go through every point of actual data (as seen in the plots below)
 
 ```{r}
 library(ggplot2)
 library(gridExtra)
 library(splines)
 
-# Simulate more nonlinear data
+# Simulate nonlinear data
 set.seed(42)
 x <- seq(0, 10, length.out = 10)
 y <- 0.5 * x^2 - 3 * x + 5 + rnorm(10, mean = 0, sd = 2)
 df <- data.frame(x = x, y = y)
 
-# 1. Underfit model: simple linear regression
+# 1. Underfit model
 model_lm <- lm(y ~ x, data = df)
 df$y_lm <- predict(model_lm)
 
-# 2. Moderately saturated: smooth spline with lower spar (more flexible)
+# 2. Moderately saturated
 spline_fit <- smooth.spline(df$x, df$y, spar = 0.4)  # lower spar for more "wiggle"
 x_dense <- seq(min(x), max(x), length.out = 200)
 spline_pred <- predict(spline_fit, x_dense)
 df_spline <- data.frame(x = spline_pred$x, y = spline_pred$y)
 
-# 3. Fully saturated: perfect interpolation
+# 3. Fully saturated 
 df$y_sat <- df$y  # fitted values equal observed values
 
-# Plot 1: Underfit (Linear Regression)
+# Plot 1: Underfit 
 p1 <- ggplot(df, aes(x, y)) +
   geom_point(color = "blue") +
   geom_line(aes(y = y_lm), color = "black") +
@@ -418,7 +419,7 @@ p1 <- ggplot(df, aes(x, y)) +
   ggtitle("Underfit Model") +
   theme_minimal()
 
-# Plot 2: Moderately Saturated (Spline Fit)
+# Plot 2: Moderately Saturated 
 p2 <- ggplot(df, aes(x, y)) +
   geom_point(color = "blue") +
   geom_line(data = df_spline, aes(x = x, y = y), color = "orange") +
@@ -426,7 +427,7 @@ p2 <- ggplot(df, aes(x, y)) +
   ggtitle("Moderately Saturated Model") +
   theme_minimal()
 
-# Plot 3: Fully Saturated (Perfect Fit)
+# Plot 3: Fully Saturated 
 p3 <- ggplot(df, aes(x, y)) +
   geom_point(color = "blue") +
   geom_line(aes(y = y_sat), color = "green") +
@@ -439,7 +440,8 @@ grid.arrange(p1, p2, p3, nrow = 1)
 
 ```
 
-In almost all cases, the saturated model is not a sensible model as
+However, in almost all cases, **the saturated model is not a sensible
+model** because
 
 1.  If we were to take another sample from the population, their
     observations would not exhibit the exact same trend.
@@ -448,6 +450,100 @@ In almost all cases, the saturated model is not a sensible model as
     inherent in our particular sample, and not the underlying
     relationship that exists in the population.
 
-3.  We should try avoid over fitting models, such as the saturated
-    models, so that they only describe the underlying trends in the
-    population, and not random noise from our sample
+3.  We should try avoid over-fitting models, such as the saturated
+    models, so that our chosen model only describe the underlying trends
+    in the population, and not random noise from our sample
+
+# V.II Deviance as a "Goodness-of-Fit"
+
+------------------------------------------------------------------------
+
+::: callout-note
+## 💡 Key Takeaways:
+
+1.  Our deviance comes from a chi-squared distribution with *n - k*
+    degrees of freedom, where *n* is the number of observations and *k*
+    is the number of coefficients.
+
+2.  If it is plausible that our deviance could have come from this
+    distribution, we have no evidence against the null hypothesis that
+    our model is correct.
+
+3.  In R we use `1 - pchisq(deviance, df)` to calculate the area beneath
+    the chi-squared probability density function to the right of our
+    observed deviance value. If this area (p-value) is large, then our
+    model is correct.
+:::
+
+For a GLM,
+
+-   Parameter estimation is achieved by minimising the deviance.
+
+-   The more variance, the larger the deviance.
+
+-   The saturated model has deviance equal to zero.
+
+-   Increasing a models complexity will decrease the deviance.
+
+-   $D_S≤D≤D_N$
+
+Sound familiar?
+
+<br>
+
+At a high level, a model that fits poorly will have a large deviance,
+while a model that fits well will have a small deviance. This may occur
+because:
+
+1.  Our model is too simple and does not have the right explanatory
+    terms.
+
+2.  The response variable has more variance than assumed under our
+    assumed distribution.
+
+<br>
+
+**🧠 Below, we can see an example where**
+
+-   `1 - pchisq(deviance, df)` gives the p-value for a deviance test.
+
+-   A **large deviance** (e.g., 88.54) lies far in the tail → small
+    p-value → we **reject** the model.
+
+-   A **small deviance** (e.g., 27.33) lies well within the expected
+    range → large p-value → we **do not reject** the model.
+
+```{r}
+# Load necessary package
+library(ggplot2)
+
+# Function to plot chi-squared distribution and shade tail
+plot_chisq <- function(deviance, df, title_text) {
+  x <- seq(0, max(deviance + 10, 50), length.out = 500)
+  y <- dchisq(x, df)
+
+  ggplot(data.frame(x, y), aes(x, y)) +
+    geom_line() +
+    geom_area(data = subset(data.frame(x, y), x > deviance), aes(x, y), fill = "grey", alpha = 0.5) +
+    geom_point(aes(x = deviance, y = dchisq(deviance, df)), size = 2) +
+    geom_segment(aes(x = deviance, xend = deviance, y = 0, yend = dchisq(deviance, df))) +
+    labs(title = title_text,
+         x = "x",
+         y = "f(x)") +
+    theme_minimal() +
+    ylim(0, 0.07)
+}
+
+# Example 1: High deviance
+p1 <- plot_chisq(deviance = 88.54, df = 19, 
+                 title_text = "High deviance rejects the null hypothesis")
+
+# Example 2: Low deviance
+p2 <- plot_chisq(deviance = 27.33, df = 19, 
+                 title_text = "Small deviance does not reject the null hypothesis")
+
+# Display side by side
+library(gridExtra)
+grid.arrange(p1, p2, ncol = 2)
+
+```
