@@ -17,4 +17,50 @@ editor_options:
     wrap: 72
 ---
 
-test
+Differences in data distributions and how you should model,where the
+distribution is a function that shows the possible values of a variable
+and how frequently they occur.
+
+### Distributions
+
+```{r}
+
+# ------------------------------
+# Normal Distribution (mean = 0, sd = 1)
+# ------------------------------
+R <- 1000000
+y_norm <- rnorm(R, mean = 0, sd = 1)
+hist(y_norm, prob = TRUE, 
+     main = "Histogram of Normal Distribution", 
+     xlab = "Value", col = "lightgray", border = "white")
+
+lines(density(y_norm), col = "red", lwd = 2)
+
+# ------------------------------
+# Binomial Distribution (n = 20, p = 0.3)
+# ------------------------------
+n <- 20
+p <- 0.3
+
+y_binom <- rbinom(R, size = n, prob = p)
+
+hist(y_binom, prob = TRUE, breaks = n,
+     main = "Histogram of Binomial Distribution",
+     xlab = "Number of Successes", col = "lightblue", border = "white")
+
+lines(density(y_binom), col = "red", lwd = 2)
+
+# ------------------------------
+# Poisson Distribution (lambda = 3)
+# ------------------------------
+lambda <- 3
+y_pois <- rpois(R, lambda = lambda)
+
+hist(y_pois, prob = TRUE, breaks = max(y_pois),
+     main = "Histogram of Poisson Distribution",
+     xlab = "Count", col = "lightgreen", border = "white")
+
+lines(density(y_pois), col = "red", lwd = 2)
+
+
+```

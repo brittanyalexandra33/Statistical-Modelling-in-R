@@ -31,7 +31,7 @@ Many things in life can be modeled with the poisson process as it quite
 literally models the long-term average rate of which random events occur
 independently. Its subjectively the most widely used model of a point
 process in time, and is suitable for modelling *frequencies* and
-probabilities*.*
+*probabilities.*
 
 <br>
 
@@ -75,6 +75,21 @@ describe the response:]{.underline}
 -   Bounded between 1 and infinity.
 
 -   Variance increases with the mean.
+
+<br>
+
+[When modelling with the any distribution in R, we will follow the
+general format of]{.underline}
+
+1.  Choose a distribution for the response: Poisson
+
+2.  Choose a parameter to relate to explanatory terms: mu_i
+
+3.  Choose a link function: log
+
+4.   Choose explanatory terms (more on this later):
+
+5.  Additional parameters may be estimated/observed:
 
 <br>
 
@@ -220,7 +235,7 @@ ggplot(df2, aes(x = eta, y = mu)) +
 ## 💡 Key Takeaways:
 
 Holding all over variables constant, for every n-unit increase in X, the
-expected value of the response in multiplied by exp(nB1)
+expected value of the response in multiplied by exp(B1)
 :::
 
 $\log(\mu) = \beta_0 + \beta_1 x$
@@ -252,10 +267,59 @@ GLMs: Maximise the log-likelihood
 
 **Maximum Log-Likelihood**
 
-As the LSE does not accommodate for increases in variance (and therefore
-needs to adjust weighting for the residuals), we use the maximum
-likelihood function. We aim to choose coefficients that provide the
-highest possible log-likelihood.
+In Generalised Linear Models (GLMs), we estimate the model\'s
+coefficients using a method called maximum likelihood estimation (MLE).
+The core idea is this: for any given set of candidate parameters, we can
+compute how likely it is that we would have observed our data, assuming
+those parameters are true. This is the **likelihood**.
+
+-   If a data point lies close to the predicted curve (or line), it
+    contributes a high likelihood---it\'s consistent with the model.
+
+-   If it\'s far from the predicted values, it contributes a low
+    likelihood---it's inconsistent with the model.
+
+<br>
+MLE works by searching for the set of parameters (usually denoted as
+$\beta$) that maximise the likelihood function. In other words, we
+choose the parameters that make our observed data as likely as possible
+under the model.
+So, instead of minimising the residual sum of squares like in linear
+regression, we are maximising the log-likelihood in GLMs. This is
+particularly useful when dealing with data where assumptions of constant
+variance or normality don\'t hold (e.g. count or binary data).
+A better-fitting model will have a higher log-likelihood, meaning it's
+more consistent with the observed data.
+
+::: callout-note
+Even though two points might look equally close to the predicted line,
+their likelihood contributions can still differ due to how spread out
+the underlying distribution is. In Poisson regression, this spread grows
+with the mean, so deviations are penalized more harshly when the
+expected value is small.
+:::
+
+```{r}
+
+set.seed(1)
+x <- 1:20
+y <- rpois(20, lambda = exp(0.2 * x))
+model <- glm(y ~ x, family = poisson())
+pred <- predict(model, type = "response")
+log_lik <- dpois(y, lambda = pred, log = TRUE)
+
+df <- data.frame(x, y, pred, log_lik)
+
+ggplot(df, aes(x, y)) +
+  geom_point(aes(color = log_lik), size = 5) +
+  geom_line(aes(y = pred), color = "blue", linetype = "dashed") +
+  scale_color_viridis_c(option = "virdis") +
+  labs(title = "Log-Likelihood Contributions of Points",
+       subtitle = "Darker points contribute less to the log-likelihood",
+       color = "Log-Likelihood") +
+  theme_minimal()
+ 
+```
 
 [To calculate the likelihood function...]{.underline}
 
@@ -283,3 +347,107 @@ highest possible log-likelihood.
 
 5.  1 - pchisq(residuals, df) should be large if our model is correct.
 :::
+
+Statistical analysis does not simply end once we have fit a model. We
+must determine whether or not our model seems appropriate.
+"Goodness-of-fit" is a property that describes how well the data appears
+to fit the model's assumptions. For a GLM, these assumptions are
+
+1.  The observations are independent.
+
+2.  $g (\theta) = X \beta$ after applying the link function, the
+    parameter of interest is a linear combination of the explanatory
+    terms.
+
+3.  Each response comes from the assumed distribution.
+
+<br>
+
+When considering a simple GLM, we can add all sorts of explanatory
+terms;
+
+-   Additional numeric explanatory variables
+
+-   Factors via dummy variables
+
+-   Non linear relationships
+
+-   All of the above
+
+<br>
+
+But, adding explanatory terms is sometimes said to make it more
+"complex", or increase its "complexity." In consequence, increasing a
+models complexity will almost always
+
+-   Decrease the residual sum of squares (linear regression), OR
+
+-   Increase the maximised log-likelihood (GLMS).
+
+**Model Saturation**
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+library(splines)
+
+# Simulate more nonlinear data
+set.seed(42)
+x <- seq(0, 10, length.out = 10)
+y <- 0.5 * x^2 - 3 * x + 5 + rnorm(10, mean = 0, sd = 2)
+df <- data.frame(x = x, y = y)
+
+# 1. Underfit model: simple linear regression
+model_lm <- lm(y ~ x, data = df)
+df$y_lm <- predict(model_lm)
+
+# 2. Moderately saturated: smooth spline with lower spar (more flexible)
+spline_fit <- smooth.spline(df$x, df$y, spar = 0.4)  # lower spar for more "wiggle"
+x_dense <- seq(min(x), max(x), length.out = 200)
+spline_pred <- predict(spline_fit, x_dense)
+df_spline <- data.frame(x = spline_pred$x, y = spline_pred$y)
+
+# 3. Fully saturated: perfect interpolation
+df$y_sat <- df$y  # fitted values equal observed values
+
+# Plot 1: Underfit (Linear Regression)
+p1 <- ggplot(df, aes(x, y)) +
+  geom_point(color = "blue") +
+  geom_line(aes(y = y_lm), color = "black") +
+  geom_segment(aes(xend = x, yend = y_lm), color = "red", linetype = "dashed") +
+  ggtitle("Underfit Model") +
+  theme_minimal()
+
+# Plot 2: Moderately Saturated (Spline Fit)
+p2 <- ggplot(df, aes(x, y)) +
+  geom_point(color = "blue") +
+  geom_line(data = df_spline, aes(x = x, y = y), color = "orange") +
+  geom_segment(aes(xend = x, yend = predict(spline_fit, x)$y), color = "red", linetype = "dashed") +
+  ggtitle("Moderately Saturated Model") +
+  theme_minimal()
+
+# Plot 3: Fully Saturated (Perfect Fit)
+p3 <- ggplot(df, aes(x, y)) +
+  geom_point(color = "blue") +
+  geom_line(aes(y = y_sat), color = "green") +
+  ggtitle("Fully Saturated Model") +
+  theme_minimal()
+
+# Combine the three plots
+grid.arrange(p1, p2, p3, nrow = 1)
+
+
+```
+
+In almost all cases, the saturated model is not a sensible model as
+
+1.  If we were to take another sample from the population, their
+    observations would not exhibit the exact same trend.
+
+2.  The exact pattern we see therefore reflects the random white noise
+    inherent in our particular sample, and not the underlying
+    relationship that exists in the population.
+
+3.  We should try avoid over fitting models, such as the saturated
+    models, so that they only describe the underlying trends in the
+    population, and not random noise from our sample
